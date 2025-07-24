@@ -1,0 +1,27 @@
+﻿networks:
+  dev:
+
+services:
+  api:
+    image: api
+    build:
+      context: .
+      dockerfile: API/Dockerfile
+
+  mvapp_db:
+    image: postgres:16.3
+    container_name: app_db_container
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=MvDatabase
+    ports:
+      - "5432:5432"
+    restart: always
+    volumes:
+      - app_data:/var/lib/postgresql/data
+    networks:
+      - dev
+
+volumes:
+  app_data:
