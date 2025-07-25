@@ -28,14 +28,18 @@ public class AuthDto
         public string token { get; set; }
     }
     
-    public class Responce
+    public class Response
     {
         public string AccessToken { get; set; }
 
         public string RefreshToken { get; set; }
 
-        public string UserName { get; set; }
-
+        public string UserName { get; set; } 
+        
+        public DateTime TokenAccessExpires { get; set; }
+        
+        public DateTime RefreshTokenExpires { get; set; }
+        
         public IEnumerable<string> Roles { get; set; }
     }
     

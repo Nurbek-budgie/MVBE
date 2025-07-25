@@ -1,5 +1,9 @@
 ﻿using System.Text;
 using System.Text.Json.Serialization;
+using AutoMapper;
+using BLL.Configurations;
+using BLL.Interfaces.Identity;
+using BLL.Services;
 using DAL.EF;
 using DAL.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -35,7 +39,7 @@ public static class ServiceRegistration
 
         // Database Context Configuration
         services.AddDbContext<AppDbContext>
-            (options => options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")), ServiceLifetime.Scoped);
+            (options => options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
         
         
         
@@ -91,15 +95,17 @@ public static class ServiceRegistration
     public static IServiceCollection AddDependencyInjection(this IServiceCollection services)
     {
         services.AddTransient<AuthService>();
+        services.AddScoped<IIdentityService, IdentityService>();
+        
         return services;
     }
     
     public static IServiceCollection AddAutoMapperConfiguration(this IServiceCollection services)
     {
-        // services.AddSingleton(_ => new MapperConfiguration(cfg =>
-        // {
-        //     cfg.AddProfile(new AutoMapperProfile());
-        // }).CreateMapper());
+        services.AddSingleton(_ => new MapperConfiguration(cfg =>
+        {
+            cfg.AddProfile(new AutoMapperProfile());
+        }).CreateMapper());
 
         return services;
     }
