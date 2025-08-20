@@ -9,7 +9,7 @@ namespace API.Controllers.Auth;
 public class AuthController: ControllerBase
 {
     private readonly AuthService _service;
-
+    
     public AuthController(AuthService service)
     {
         _service = service;

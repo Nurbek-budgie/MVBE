@@ -1,4 +1,5 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using API.Configurations.Extentions;
 using Common.Enums;
 using Microsoft.AspNetCore.Authorization;
@@ -35,9 +36,10 @@ public class AuthorizeRoleAttribute : AuthorizeAttribute, IAsyncActionFilter
        {
            var jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
            
-           var roleFromToken = jwtToken.Claims.FirstOrDefault(x => x.Type == "RoleName")?.Value;
+           var roleFromToken = jwtToken.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Role || x.Type == "role")?.Value.ToLower();
            var roleFromEnum = Enum.GetValues(typeof(ERoles))
                .Cast<ERoles>()
+               .Where(role => _roles.Contains(role)) 
                .Select(role => role.GetDescription())
                .ToArray();
 

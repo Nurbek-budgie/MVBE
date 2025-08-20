@@ -1,3 +1,4 @@
+using API.Configurations;
 using BLL.Interfaces.Identity;
 using Common.Enums;
 using DTO.Auth;
@@ -14,7 +15,9 @@ public class AdminUserController : ControllerBase
     {
         _identityService = identityService;
     }
+    
     // admin forgot password, change password, change data, delete admin.
+    [AuthorizeRole(ERoles.Admin)]
     [HttpPost("RegisterAdmin")]
     public async Task<IActionResult> CreateAdmin(UserDto.Register userDto, ERoles role)
     {

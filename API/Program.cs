@@ -1,4 +1,5 @@
 using API.Configurations;
+using API.Middleware;
 using DAL.EF;
 using DAL.Models;
 using Microsoft.AspNetCore.Identity;
@@ -43,9 +44,12 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<AppDbContext>();
     var roleManager = services.GetRequiredService<RoleManager<Role>>();
     var userManager = services.GetRequiredService<UserManager<User>>();
 
+    DbInitializer.Initialize(context);
+    
     await DbSeeder.SeedRolesAsync(roleManager);
     await DbSeeder.SeedAdminUserAsync(userManager);
 }
@@ -57,7 +61,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-
+app.UseMiddleware<ErrorHandlerMiddleware>();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

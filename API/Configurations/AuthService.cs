@@ -48,6 +48,7 @@ public class AuthService
         
         var claims = new List<Claim>()
         {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new(ClaimTypes.Email, username)
         };
         claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
