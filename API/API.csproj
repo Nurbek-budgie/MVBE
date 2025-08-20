@@ -33,4 +33,9 @@
       <ProjectReference Include="..\DTO\DTO.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Controllers\Movie\" />
+      <Folder Include="Controllers\Reservation\" />
+    </ItemGroup>
+
 </Project>

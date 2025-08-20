@@ -16,4 +16,9 @@
       <ProjectReference Include="..\DTO\DTO.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Interfaces\Movie\" />
+      <Folder Include="Services\Movie\" />
+    </ItemGroup>
+
 </Project>
