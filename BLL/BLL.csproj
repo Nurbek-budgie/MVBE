@@ -14,11 +14,7 @@
     <ItemGroup>
       <ProjectReference Include="..\DAL\DAL.csproj" />
       <ProjectReference Include="..\DTO\DTO.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Interfaces\Movie\" />
-      <Folder Include="Services\Movie\" />
+      <ProjectReference Include="..\Repository\Repository.csproj" />
     </ItemGroup>
 
 </Project>

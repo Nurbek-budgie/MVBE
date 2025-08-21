@@ -14,6 +14,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLL", "BLL\BLL.csproj", "{E0A4AA2F-3267-4E96-9880-9C743D2A2E9F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3BE9D616-82E8-4CF9-A04B-A0E6819BB0EC} = {3BE9D616-82E8-4CF9-A04B-A0E6819BB0EC}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAL", "DAL\DAL.csproj", "{02979ADA-4907-483A-8F7E-4744DD4DCA07}"
 EndProject
