@@ -116,5 +116,6 @@ public class MovieDto
             public DateTime? ReleaseDate { get; set; }
             public string? PosterUrl { get; set; }
             public bool IsActive { get; set; }
+            public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         }
 }

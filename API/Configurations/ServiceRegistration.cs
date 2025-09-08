@@ -3,13 +3,16 @@ using System.Text.Json.Serialization;
 using AutoMapper;
 using BLL.Configurations;
 using BLL.Interfaces.Identity;
+using BLL.Interfaces.Movie;
 using BLL.Services;
+using BLL.Services.Movie;
 using DAL.EF;
 using DAL.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Repository.Movie;
 
 namespace API.Configurations;
 
@@ -96,6 +99,14 @@ public static class ServiceRegistration
     {
         services.AddTransient<AuthService>();
         services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<IMovieService, MovieService>();
+        services.AddScoped<MovieRepository>();
+        services.AddScoped<ITheaterService, TheaterService>();
+        services.AddScoped<TheaterRepository>();
+        services.AddScoped<IScreenService, ScreenService>();
+        services.AddScoped<ScreenRepository>();
+        services.AddScoped<IScreeningService, ScreeningService>();
+        services.AddScoped<ScreeningRepository>();
         
         return services;
     }

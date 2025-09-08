@@ -1,10 +1,11 @@
 using AutoMapper;
+using BLL.Interfaces.Movie;
 using DTO.MovieDTOS;
 using Repository.Movie;
 
 namespace BLL.Services.Movie;
 
-public class MovieService
+public class MovieService : IMovieService
 {
     private readonly IMapper _mapper;
     private readonly MovieRepository _movieRepository;
@@ -47,16 +48,17 @@ public class MovieService
             if (createMovieDto == null)
                 throw new ArgumentNullException(nameof(createMovieDto));
 
-            var movie = _mapper.Map<Movie>(createMovieDto);
+            var movie = _mapper.Map<DAL.Models.Movie.Movie>(createMovieDto);
             movie.IsActive = true;
             movie.CreatedAt = DateTime.UtcNow;
             movie.UpdatedAt = DateTime.UtcNow;
 
             var createdMovie = await _movieRepository.Create(movie);
+            
             return _mapper.Map<MovieDto.Read>(createdMovie);
         }
 
-        public async Task<MovieDto.Read> UpdateMovieAsync(int id, MovieDto.Create updateMovieDto)
+        public async Task<MovieDto.Read> UpdateMovieAsync(int id, MovieDto.Update updateMovieDto)
         {
             if (updateMovieDto == null)
                 throw new ArgumentNullException(nameof(updateMovieDto));
