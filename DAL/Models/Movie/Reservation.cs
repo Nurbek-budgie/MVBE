@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Common.Enums.MovieEnums;
-using Microsoft.AspNetCore.Identity;
 
 namespace DAL.Models.Movie;
 
