@@ -49,7 +49,7 @@ public class AppDbContext : IdentityDbContext<User, Role, Guid, UserClaim, UserR
         });
 
         builder.Entity<Seat>()
-            .HasIndex(s => new { s.ScreenId, s.SeatNumber })
+            .HasIndex(s => new { s.ScreenId, s.RowNumber, s.SeatNumber })
             .IsUnique();
         
         builder.Entity<Reservation>()

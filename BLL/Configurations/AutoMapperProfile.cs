@@ -99,16 +99,10 @@ public class AutoMapperProfile : Profile
             .ReverseMap();
         
         // Reservation
-
-        CreateMap<ReservationDto.Create, Reservation>()
-            .ForMember(dest => dest.ReservationNumber, opt => opt.Ignore())
-            .ForMember(dest => dest.BookingStatus, opt => opt.MapFrom(src => BookingStatus.Pending))
-            .ForMember(dest => dest.PaymentStatus, opt => opt.MapFrom(src => PaymentStatus.Pending))
-            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
-            .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
-            .ReverseMap();
-    
         CreateMap<ReservationDto.Read, Reservation>()
+            .ReverseMap();
+        
+        CreateMap<Reservation, ReservationDto.Read>()
             .ReverseMap();
     }
 }

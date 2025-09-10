@@ -14,10 +14,13 @@ public class ScreenDto
         [MaxLength(50)]
         public string Name { get; set; } // Screen 1, Hall A, etc.
         
-        [Required(ErrorMessage ="TotalSeats is required")]
-        public int TotalSeats { get; set; }
-        
         public ScreenType ScreenType { get; set; }
+        
+        [Required(ErrorMessage ="Row is required")]
+        public int Row { get; set; }
+        
+        [Required(ErrorMessage ="Row Number is required")]
+        public int Number { get; set; }
     }
 
     public class Update
@@ -28,9 +31,6 @@ public class ScreenDto
         [Required(ErrorMessage ="Screen Name is required")]
         [MaxLength(50)]
         public string Name { get; set; } // Screen 1, Hall A, etc.
-        
-        [Required(ErrorMessage ="TotalSeats is required")]
-        public int TotalSeats { get; set; }
         
         public ScreenType ScreenType { get; set; }
         

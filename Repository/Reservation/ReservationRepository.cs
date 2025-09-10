@@ -31,26 +31,27 @@ public async Task<ReservationEntity> ReserveAsync(Guid userId, List<Tuple<string
 
     // Step 2: check requested seats
     var reservedSeats = new List<ReservedSeat>();
+    
+    var screen = await _dbContext.Screens
+        .Include(s => s.Seats)
+        .FirstOrDefaultAsync(s => s.Id == screening.ScreenId);
 
+    if (screen == null)
+        throw new InvalidOperationException("Screen not found");
+    
     foreach (var (row, number) in seatRequests)
     {
-        var seat = screening.Screen.Seats
-            .FirstOrDefault(s => s.RowNumber == row && s.SeatNumber == number);
-
+        var seat = screen.Seats.FirstOrDefault(s => s.RowNumber == row && s.SeatNumber == number);
         if (seat == null)
             throw new InvalidOperationException($"Seat {row}{number} does not exist in this screen");
 
-        // Check if already reserved for this screening
+        // Check if already reserved
         bool isTaken = await _dbContext.ReservedSeats
             .AnyAsync(rs => rs.SeatId == seat.Id && rs.Reservation.ScreeningId == screeningId);
 
-        if (isTaken)
-            throw new InvalidOperationException($"Seat {row}{number} is already reserved");
-
         reservedSeats.Add(new ReservedSeat
         {
-            SeatId = seat.Id,
-            // TODO
+            SeatId = seat.Id
         });
     }
 
@@ -75,4 +76,21 @@ public async Task<ReservationEntity> ReserveAsync(Guid userId, List<Tuple<string
     return reservation;
 }
 
+
+public async Task<ReservationEntity> UpdateReservationStatus(int reserveId, BookingStatus status, PaymentStatus paymentStatus, PaymentMethod paymentMethod)
+{
+    var entity = await _dbContext.Reservations
+        .FirstOrDefaultAsync(rs => rs.Id == reserveId);
+    if (entity == null)
+        throw new KeyNotFoundException("Reservation not found");
+    
+    entity.BookingStatus = status;
+    entity.PaymentStatus = paymentStatus;
+    entity.PaymentMethod = paymentMethod;
+    
+    _dbContext.Reservations.Update(entity);
+    await _dbContext.SaveChangesAsync();
+    
+    return entity;
+}
 }

@@ -5,37 +5,20 @@ namespace DTO.Reservation;
 
 public class ReservationDto
 {
-    public class Create
+    public class ReserveSeat
     {
-        [Required]
-        [MaxLength(450)] // AspNetUser Id length
-        public Guid UserId { get; set; }
-        
         [Required(ErrorMessage = "ScreeningId is required")]
         public int ScreeningId { get; set; }
         
-        [Required(ErrorMessage = "The amount is required")]
-        public decimal TotalAmount { get; set; }
-        
-        [Required(ErrorMessage = "Payment method is required")]
-        public PaymentMethod PaymentMethod { get; set; }
-        
-        //public DateTime? ExpiresAt { get; set; } // For temporary holds
-        
-        // Navigation properties
-        //[ForeignKey("ScreeningId")]
-        //public virtual Screening Screening { get; set; }
-        
-        //[ForeignKey("UserId")]
-        //public virtual User User { get; set; }
-        
-        //public virtual ICollection<ReservedSeat> ReservedSeats { get; set; } = new List<ReservedSeat>();
+        [Required]
+        public List<SeatInfo> Seats { get; set; }
     }
     
     public class Update
     {
         public BookingStatus BookingStatus { get; set; }
         public PaymentStatus PaymentStatus { get; set; }
+        public PaymentMethod PaymentMethod { get; set; }
         public string? TransactionId { get; set; }
     }
     public class Read
@@ -57,5 +40,11 @@ public class ReservationDto
         // Nested DTOs for richer responses
         //public ScreeningDto.List? Screening { get; set; }
         //public List<ReservedSeatDto.Read> ReservedSeats { get; set; } = new();
+    }
+
+    public class SeatInfo
+    {
+        public string Row { get; set; }
+        public string Number { get; set; }
     }
 }

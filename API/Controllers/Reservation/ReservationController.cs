@@ -1,3 +1,6 @@
+using BLL.Interfaces.Reservation;
+using BLL.Services.Reservation;
+using DTO.Reservation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,16 +10,19 @@ namespace API.Controllers.Reservation;
 public class ReservationController : ControllerBase
 {
 
-    public ReservationController()
+    private readonly IReservationService _service;
+    public ReservationController(IReservationService service)
     {
-        
+        _service = service;
     }
+    
     [AllowAnonymous]
     [HttpPost]
-    [Route("/api/reservation/create")]
-    public async Task<IActionResult> CreateReservation()
+    [Route("/reserve")]
+    public async Task<ReservationDto.Read> CreateReservation(Guid userId,ReservationDto.ReserveSeat reservation)
     {
-        throw new NotImplementedException();
+        var reserve = await _service.CreateReservation(userId, reservation);
+        return reserve;
     }
     
     

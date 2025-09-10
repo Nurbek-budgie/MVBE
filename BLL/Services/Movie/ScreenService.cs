@@ -26,8 +26,10 @@ public class ScreenService : IScreenService
         var entity = _mapper.Map<Screen>(screen);
         entity.IsActive = true;
     
+        
         var result = await _screenRepository.Create(entity);
-    
+        result = await _screenRepository.PopulateSeats(entity, screen.Row, screen.Number);
+        
         return _mapper.Map<ScreenDto.Read>(result);
     }
 

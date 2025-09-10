@@ -4,8 +4,10 @@ using AutoMapper;
 using BLL.Configurations;
 using BLL.Interfaces.Identity;
 using BLL.Interfaces.Movie;
+using BLL.Interfaces.Reservation;
 using BLL.Services;
 using BLL.Services.Movie;
+using BLL.Services.Reservation;
 using DAL.EF;
 using DAL.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -13,6 +15,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Repository.Movie;
+using Repository.Reservation;
 
 namespace API.Configurations;
 
@@ -107,6 +110,8 @@ public static class ServiceRegistration
         services.AddScoped<ScreenRepository>();
         services.AddScoped<IScreeningService, ScreeningService>();
         services.AddScoped<ScreeningRepository>();
+        services.AddScoped<IReservationService, ReservationService>();
+        services.AddScoped<ReservationRepository>();
         
         return services;
     }
