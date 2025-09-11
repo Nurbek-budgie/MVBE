@@ -77,4 +77,11 @@ public class ScreeningDto
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
     }
+
+    public class ListWithTime
+    {
+        public int Id { get; set; }
+        public DateTime StartTime { get; set; }
+        public decimal BasePrice { get; set; }
+    }
 }

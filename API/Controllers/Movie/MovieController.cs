@@ -45,6 +45,13 @@ public class MovieController : ControllerBase
     }
 
     [HttpGet]
+    [Route("/api/groupedmovies")]
+    public async Task<IEnumerable<CinemaDto.Theater>> GetMOvv(int movieId)
+    {
+        return await _movieService.Getmov(movieId);
+    }
+    
+    [HttpGet]
     [Route("/api/movies/{id}")]
     public async Task<MovieDto.Read> GetMovie(int id)
     {

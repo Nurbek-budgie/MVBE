@@ -43,6 +43,13 @@ public class MovieService : IMovieService
             return _mapper.Map<IEnumerable<MovieDto.List>>(movies);
         }
 
+        public async Task<IEnumerable<CinemaDto.Theater>> Getmov(int movieId)
+        {
+            var movie = await _movieRepository.FetchMovieWithScreenings(movieId);
+
+            return movie;
+        }
+
         public async Task<MovieDto.Read> CreateMovieAsync(MovieDto.Create createMovieDto)
         {
             if (createMovieDto == null)
@@ -88,6 +95,8 @@ public class MovieService : IMovieService
             await _movieRepository.Update(movie);
             return true;
         }
+        
+        
 
         public async Task<bool> MovieExistsAsync(int id)
         {

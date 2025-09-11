@@ -10,7 +10,18 @@ public class ScreenRepository : BaseRepository<Screen, int>
     {
         
     }
-    
+
+    public async override Task<Screen> GetById(int id)
+    {
+        var screen = _dbSet
+            .Include(s => s.Screenings)
+            .Include(s => s.Theater)
+            .Include(s => s.Seats)
+            .FirstOrDefault(s => s.Id == id);
+        
+        return screen;
+    }
+
     public async Task<IEnumerable<Screen>> GetAllActiveScreens()
     {
         var screens = _dbSet.Where(s => s.IsActive == true).ToListAsync();

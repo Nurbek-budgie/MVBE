@@ -27,6 +27,7 @@ public class AutoMapperProfile : Profile
             .ReverseMap();
         
         CreateMap<MovieDto.Read, Movie>()
+            .ForMember(dest => dest.Screenings, opt => opt.MapFrom(src => src.Screenings))
             .ReverseMap();
 
         CreateMap<MovieDto.List, Movie>()
@@ -96,6 +97,9 @@ public class AutoMapperProfile : Profile
             .ReverseMap();
         
         CreateMap<ScreeningDto.List, Screening>()
+            .ReverseMap();
+        
+        CreateMap<ScreeningDto.ListWithTime, Screening>()
             .ReverseMap();
         
         // Reservation

@@ -7,7 +7,7 @@ public class MovieDto
     public class Read
         {
             public int Id { get; set; }
-            public string Title { get; set; } = string.Empty;
+            public string Title { get; set; }
             public string? Description { get; set; }
             public string? Genre { get; set; }
             public string? Director { get; set; }
@@ -21,6 +21,8 @@ public class MovieDto
             public bool IsActive { get; set; }
             public DateTime CreatedAt { get; set; }
             public DateTime UpdatedAt { get; set; }
+            
+            public List<ScreeningDto.ListWithTime> Screenings { get; set; }
         }
 
        
@@ -108,7 +110,7 @@ public class MovieDto
         public class List
         {
             public int Id { get; set; }
-            public string Title { get; set; } = string.Empty;
+            public string Title { get; set; }
             public string? Genre { get; set; }
             public string? Director { get; set; }
             public int Duration { get; set; }
@@ -116,6 +118,6 @@ public class MovieDto
             public DateTime? ReleaseDate { get; set; }
             public string? PosterUrl { get; set; }
             public bool IsActive { get; set; }
-            public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+            public DateTime CreatedAt { get; set; }
         }
 }

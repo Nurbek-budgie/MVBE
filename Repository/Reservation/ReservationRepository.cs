@@ -49,6 +49,11 @@ public async Task<ReservationEntity> ReserveAsync(Guid userId, List<Tuple<string
         bool isTaken = await _dbContext.ReservedSeats
             .AnyAsync(rs => rs.SeatId == seat.Id && rs.Reservation.ScreeningId == screeningId);
 
+        if (isTaken)
+        {
+            throw new InvalidOperationException("Reservation already taken");
+        }
+        
         reservedSeats.Add(new ReservedSeat
         {
             SeatId = seat.Id
