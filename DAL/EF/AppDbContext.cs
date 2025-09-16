@@ -21,6 +21,7 @@ public class AppDbContext : IdentityDbContext<User, Role, Guid, UserClaim, UserR
     public DbSet<ScreeningSeatPrice> ScreeningSeatPrices { get; set; }
     public DbSet<Reservation> Reservations { get; set; }
     public DbSet<ReservedSeat> ReservedSeats { get; set; }
+    public DbSet<FeaturedMovie> FeaturedMovies { get; set; }
     
     protected override void OnModelCreating(ModelBuilder builder)
     {

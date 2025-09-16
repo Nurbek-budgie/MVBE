@@ -16,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Repository.Movie;
 using Repository.Reservation;
+using Repository.Service;
 
 namespace API.Configurations;
 
@@ -112,6 +113,9 @@ public static class ServiceRegistration
         services.AddScoped<ScreeningRepository>();
         services.AddScoped<IReservationService, ReservationService>();
         services.AddScoped<ReservationRepository>();
+        services.AddScoped<IFileStorageService, FileStorageService>();
+        services.AddScoped<IFeaturedMovieService, FeaturedMovieService>();
+        services.AddScoped<FeaturedMovieRepository>();
         
         return services;
     }
@@ -131,7 +135,7 @@ public static class ServiceRegistration
         services.AddCors(options =>
         {
             options.AddPolicy("AllowReactApp", policy =>
-                policy.WithOrigins("http://localhost:3000")
+                policy.WithOrigins("http://localhost:5173")
                     .AllowAnyHeader()
                     .AllowAnyMethod());
         });

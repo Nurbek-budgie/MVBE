@@ -5,6 +5,7 @@ using DAL.Models.Movie;
 using DTO.Auth;
 using DTO.MovieDTOS;
 using DTO.Reservation;
+using Repository.DTO;
 
 namespace BLL.Configurations;
 
@@ -24,6 +25,11 @@ public class AutoMapperProfile : Profile
         CreateMap<MovieDto.Create, Movie>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.Screenings, opt => opt.Ignore())
+            .ForMember(dest => dest.PosterUrl, opt => opt.Ignore())
+            .ForMember(dest => dest.TrailerUrl, opt => opt.Ignore())
+            .ReverseMap();
+        
+        CreateMap<CreateMovie, MovieDto.Create>()
             .ReverseMap();
         
         CreateMap<MovieDto.Read, Movie>()
@@ -107,6 +113,18 @@ public class AutoMapperProfile : Profile
             .ReverseMap();
         
         CreateMap<Reservation, ReservationDto.Read>()
+            .ReverseMap();
+        
+        // Featured Movie 
+        
+        CreateMap<FeaturedMovieDto.Create, FeaturedMovie>()
+            .ReverseMap();
+        
+        // CreateMap<FeaturedMovieDto.Read, FeaturedMovie>()
+        //     .ForMember(dest => dest.Movie.PosterUrl, opt => opt.MapFrom(src => src.PosterUrl));
+        //
+        CreateMap<FeaturedMovie, FeaturedMovieDto.Read>()
+            .ForMember(dest => dest.PosterUrl, opt => opt.MapFrom(src => src.Movie.TrailerUrl))
             .ReverseMap();
     }
 }
