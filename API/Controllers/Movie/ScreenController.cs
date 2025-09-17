@@ -1,4 +1,5 @@
 using BLL.Interfaces.Movie;
+using Common.Enums.MovieEnums;
 using DTO.MovieDTOS;
 using Microsoft.AspNetCore.Mvc;
 
@@ -40,6 +41,13 @@ public class ScreenController : ControllerBase
     public async Task<IEnumerable<ScreenDto.List>> GetScreensAsync()
     {
         return await _screenService.GetAllScreens();
+    }
+    
+    [HttpGet]
+    [Route("/screens/type/{type}")]
+    public async Task<IEnumerable<ScreenTypeDto.Cinema>> GetScreenTypeAsync(ScreenType type)
+    {
+        return await _screenService.GetScreenTypeTheaterAsync(type);
     }
     
     [HttpGet]

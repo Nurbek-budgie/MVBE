@@ -4,5 +4,5 @@ public enum ScreenType
 {
     Standard = 0,
     IMAX = 1,
-    DolbyCinema = 2
+    DolbyAtmos = 2
 }

@@ -1,3 +1,4 @@
+using Common.Enums.MovieEnums;
 using DAL.EF;
 using DTO.MovieDTOS;
 using Microsoft.EntityFrameworkCore;
@@ -116,4 +117,5 @@ public class MovieRepository : BaseRepository<MovieEn, int>
         // TODO should return time span of 7 days counting yesterday
         return theaterGroup;
     }
+    
 }

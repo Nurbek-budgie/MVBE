@@ -1,5 +1,6 @@
 using AutoMapper;
 using BLL.Interfaces.Movie;
+using Common.Enums.MovieEnums;
 using DAL.Models.Movie;
 using DTO.MovieDTOS;
 using Microsoft.VisualBasic;
@@ -62,6 +63,13 @@ public class ScreenService : IScreenService
         
         return _mapper.Map<ScreenDto.Read>(entity);
     }
+
+    public async Task<IEnumerable<ScreenTypeDto.Cinema>> GetScreenTypeTheaterAsync(ScreenType screenType)
+    {
+        var screens = await _screenRepository.GetScreenTypes(screenType);
+        return screens;
+    }
+
 
     public async Task<IEnumerable<ScreenDto.List>> GetAllScreens()
     {

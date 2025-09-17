@@ -1,5 +1,7 @@
+using Common.Enums.MovieEnums;
 using DAL.EF;
 using DAL.Models.Movie;
+using DTO.MovieDTOS;
 using Microsoft.EntityFrameworkCore;
 
 namespace Repository.Movie;
@@ -57,13 +59,47 @@ public class ScreenRepository : BaseRepository<Screen, int>
                 seats.Add(newSeat);
             }
         }
-
-        //_dbContext.Seats.AddRangeAsync(seats);
+        
         screen.TotalSeats = counter;
         screen.Seats = seats;
         
         await _dbContext.SaveChangesAsync();
         
         return screen;
+    }
+
+
+    public async Task<IEnumerable<ScreenTypeDto.Cinema>> GetScreenTypes(ScreenType screenType)
+    {
+        var screen = await _dbSet
+            .Include(s => s.Theater)
+            .Include(s => s.Screenings)
+            .ThenInclude(s => s.Movie)
+            .Where(x => x.ScreenType == screenType)
+            .ToListAsync();
+
+        if (screen == null)
+        {
+            return new List<ScreenTypeDto.Cinema>();
+        }
+        
+        var screenTypes = screen.GroupBy(x => x.Theater)
+            .Select(theater => new ScreenTypeDto.Cinema
+            {
+                CinemaId = theater.Key.Id,
+                CinemaName = theater.Key.Name,
+                Movies = theater.SelectMany(s => s.Screenings).GroupBy(sc => sc.Movie)
+                    .Select(movies => new ScreenTypeDto.Movie
+                    {
+                        MovieId = movies.Key.Id,
+                        MovieName = movies.Key.Title,
+                        Showtimes = movies.Select(showtimes => new ScreenTypeDto.Showtime
+                        {
+                            Time = showtimes.StartTime
+                        }).ToList()
+                    }).ToList()
+            }).ToList();
+        
+        return screenTypes;
     }
 }
