@@ -2,6 +2,7 @@ using AutoMapper;
 using BLL.Interfaces.Movie;
 using DAL.Models.Movie;
 using DTO.MovieDTOS;
+using Microsoft.AspNetCore.Http;
 using Repository.Movie;
 
 namespace BLL.Services.Movie;
@@ -41,6 +42,12 @@ public class TheaterService : ITheaterService
         var result = await _repository.Create(entity);
         
         return _mapper.Map<TheaterDto.Read>(result);
+    }
+
+    public async Task<TheaterDto.Read> UploadLogoImage(int id, IFormFile logo)
+    {
+        var theater = await _repository.UploadLogoTheater(id,  logo);
+        return _mapper.Map<TheaterDto.Read>(theater);
     }
 
     public async Task<TheaterDto.Read?> UpdateAsync(int id, TheaterDto.Update updatedtheater)

@@ -47,6 +47,7 @@ public class TheaterDto
         public string? City { get; set; }
         public string? Phone { get; set; }
         public bool IsActive { get; set; }
+        public string? LogoUrl { get; set; }
         public DateTime CreatedAt { get; set; }
         // many screens
     }
@@ -58,6 +59,7 @@ public class TheaterDto
         public string? Address { get; set; }
         public string? City { get; set; }
         public string? Phone { get; set; }
+        public string? LogoUrl { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
     }

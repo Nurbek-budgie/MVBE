@@ -22,6 +22,13 @@ public class TheaterController : ControllerBase
     }
 
     [HttpPut]
+    [Route("/api/theater/update/logo")]
+    public async Task<TheaterDto.Read> UploadLogo(int id, IFormFile logo)
+    {
+        return await _theaterService.UploadLogoImage(id, logo);
+    }
+    
+    [HttpPut]
     [Route("/api/theater/update")]
     public async Task<TheaterDto.Read> UpdateTheater(int id, TheaterDto.Update theater)
     {

@@ -18,6 +18,9 @@ public class Theater
         
     [MaxLength(20)]
     public string? Phone { get; set; }
+    
+    [MaxLength(500)]
+    public string? LogoUrl { get; set; }
         
     public bool IsActive { get; set; } = true;
         
