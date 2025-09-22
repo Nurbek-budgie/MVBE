@@ -80,6 +80,15 @@ public class MovieRepository : BaseRepository<MovieEn, int>
         
         return movie;
     }
+
+    public async Task<MovieEn> FectMovieWithTheaterScreenings(int id)
+    {
+        return await _dbSet
+            .Include(x => x.Screenings)
+                .ThenInclude(x => x.Screen)
+                    .ThenInclude(x => x.Theater)
+            .FirstOrDefaultAsync(x => x.Id == id);
+    }
     
     public async Task<IEnumerable<CinemaDto.Theater>> FetchMovieWithScreenings(int movieId)
     {

@@ -58,6 +58,13 @@ public class MovieController : ControllerBase
         return await _movieService.GetMovieByIdAsync(id);
     }
 
+    [HttpGet]
+    [Route("/api/moviesscre/{id}")]
+    public async Task<MovieDto.ReadWithScreenings> GetMovieeee(int id)
+    {
+        return await _movieService.GetMovieByIdWithScreenings(id);
+    }
+    
     [HttpPut]
     [Route("/api/movieupdate")]
     public async Task<MovieDto.Read> UpdateMovie(int id, MovieDto.Update movieDto)

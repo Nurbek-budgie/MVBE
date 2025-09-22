@@ -1,5 +1,4 @@
 using AutoMapper;
-using Common.Enums.MovieEnums;
 using DAL.Models;
 using DAL.Models.Movie;
 using DTO.Auth;
@@ -33,7 +32,6 @@ public class AutoMapperProfile : Profile
             .ReverseMap();
         
         CreateMap<MovieDto.Read, Movie>()
-            .ForMember(dest => dest.Screenings, opt => opt.MapFrom(src => src.Screenings))
             .ReverseMap();
 
         CreateMap<MovieDto.List, Movie>()
@@ -43,6 +41,9 @@ public class AutoMapperProfile : Profile
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.Screenings, opt => opt.Ignore())
             .ReverseMap();
+
+        CreateMap<Movie, MovieDto.ReadWithScreenings>()
+            .ForMember(dest => dest.Theaters, opt => opt.Ignore());
         
         // Theater
         CreateMap<TheaterDto.Create, Theater>()

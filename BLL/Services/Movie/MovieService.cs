@@ -35,6 +35,33 @@ public class MovieService : IMovieService
             return movie != null ? _mapper.Map<MovieDto.Read>(movie) : null;
         }
 
+        public async Task<MovieDto.ReadWithScreenings> GetMovieByIdWithScreenings(int id)
+        {
+            var movie = await _movieRepository.FectMovieWithTheaterScreenings(id);
+            
+            var dto = _mapper.Map<MovieDto.ReadWithScreenings>(movie);
+            dto.Theaters = movie.Screenings.GroupBy(s => s.Screen.Theater)
+                .Select(theater => new MovieDto.Theater
+                {
+                    Id = theater.Key.Id,
+                    TheaterName = theater.Key.Name,
+                    Screens = theater.GroupBy(s => s.Screen)
+                        .Select(s => new MovieDto.Screen
+                        {
+                            Id = s.Key.Id,
+                            ScreenName = s.Key.Name,
+                            Screenings = s.Select(screening => new MovieDto.Screening
+                            {
+                                Id = screening.Id,
+                                StartTime = screening.StartTime,
+                                BasePrice = screening.BasePrice,
+                            }).ToList()
+                        }).ToList() 
+                }).ToList();
+            
+            return dto;
+        }
+
         public async Task<IEnumerable<MovieDto.List>> GetMoviesByGenreAsync(string genre)
         {
             if (string.IsNullOrWhiteSpace(genre))
