@@ -12,11 +12,11 @@ public class Seat
         
     [Required]
     [MaxLength(10)]
-    public string SeatNumber { get; set; } // A1, A2, B1, etc.
+    public string SeatNumber { get; set; } // 1, 2, 3,4 ,5, 6 ,7
         
     [Required]
     [MaxLength(5)]
-    public string RowNumber { get; set; } // A, B, C, etc.
+    public string RowNumber { get; set; } // A, B, C, D
         
     public bool IsActive { get; set; } = true;
         

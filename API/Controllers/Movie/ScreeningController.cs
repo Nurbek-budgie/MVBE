@@ -1,5 +1,6 @@
 using BLL.Interfaces.Movie;
 using DTO.MovieDTOS;
+using DTO.Reservation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers.Movie;
@@ -34,6 +35,14 @@ public class ScreeningController : ControllerBase
     {
         return await _screeningService.GetScreeningIdAsync(id);
     }
+    
+    [HttpGet]
+    [Route("/screening/seats/{id}")]
+    public async Task<ScreenSeatDto.Result> GetScreeningSeats(int id)
+    {
+        return await _screeningService.GetScreeningSeatsIdAsync(id);
+    }
+
     
     [HttpGet]
     [Route("/screenings/active")]

@@ -19,9 +19,9 @@ public class ReservationController : ControllerBase
     [AllowAnonymous]
     [HttpPost]
     [Route("/reserve")]
-    public async Task<ReservationDto.Read> CreateReservation(Guid userId,ReservationDto.ReserveSeat reservation)
+    public async Task<ReservationDto.Read> CreateReservation(ReservationDto.ReserveSeat reservation)
     {
-        var reserve = await _service.CreateReservation(userId, reservation);
+        var reserve = await _service.CreateReservation(Guid.Parse("0198b968-a243-749f-995e-567c645081a8"), reservation);
         return reserve;
     }
     

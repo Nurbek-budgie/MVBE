@@ -2,6 +2,7 @@ using AutoMapper;
 using BLL.Interfaces.Movie;
 using DAL.Models.Movie;
 using DTO.MovieDTOS;
+using DTO.Reservation;
 using Repository.Movie;
 
 namespace BLL.Services.Movie;
@@ -52,6 +53,43 @@ public class ScreeningService : IScreeningService
         
         var screening = await _screeningRepository.GetById(id);
         return _mapper.Map<ScreeningDto.Read>(screening);
+    }
+
+    public async Task<ScreenSeatDto.Result> GetScreeningSeatsIdAsync(int screeningId)
+    {
+        var screening =  await _screeningRepository.GetScreeningSeats(screeningId);
+
+        if (screening == null)
+        {
+            throw new KeyNotFoundException($"Screening with id {screeningId} was not found");
+        }
+        
+        var reservedIds = screening.Reservations
+            .SelectMany(x => x.ReservedSeats)
+            .Select(x => x.SeatId)
+            .ToHashSet();
+
+
+        var seat = screening.Screen.Seats
+            .OrderBy(x => x.RowNumber)
+            .ThenBy(x => int.Parse(x.SeatNumber))
+            .Select(x => new ScreenSeatDto.Seat
+            {
+                SeatId = x.Id,
+                Row = x.RowNumber,
+                SeatNumber = x.SeatNumber,
+                SeatName = string.Concat(x.RowNumber, x.SeatNumber),
+                IsBooked = reservedIds.Contains(x.Id)
+            })
+            .ToList();
+
+        return new ScreenSeatDto.Result
+        {
+            ScreeningId = screeningId,
+            Row = seat.Select(x => x.Row).Distinct().ToList(),
+            SeatNumber = seat.Select(x => x.SeatNumber).Distinct().ToList(),
+            Seats = seat
+        };
     }
 
     public async Task<IEnumerable<ScreeningDto.List>> GetAllActiveScreeningAsync()
