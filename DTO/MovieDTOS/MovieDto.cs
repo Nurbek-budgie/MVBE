@@ -50,7 +50,8 @@ public class MovieDto
         [StringLength(10, ErrorMessage = "Rating cannot exceed 10 characters")]
         public string? Rating { get; set; }
 
-        [DataType(DataType.Date)] public DateTime? ReleaseDate { get; set; }
+        [DataType(DataType.Date)] 
+        public DateTime? ReleaseDate { get; set; }
 
         [StringLength(50, ErrorMessage = "Language cannot exceed 50 characters")]
         public string? Language { get; set; }

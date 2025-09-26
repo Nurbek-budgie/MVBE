@@ -42,9 +42,6 @@ public class ScreeningDto
         [Required]
         public decimal BasePrice { get; set; }
         
-        [Required]
-        public int AvailableSeats { get; set; }
-        
         public bool IsActive { get; set; }
     }
 

@@ -91,6 +91,8 @@ public class AutoMapperProfile : Profile
             .ForMember(dest => dest.Movie, opt => opt.Ignore())
             .ForMember(dest => dest.Screen, opt => opt.Ignore())
             .ForMember(dest => dest.Reservations, opt => opt.Ignore())
+            .ForMember(dest => dest.StartTime, opt => opt.MapFrom(src => DateTime.SpecifyKind(src.StartTime, DateTimeKind.Utc)))
+            .ForMember(dest => dest.EndTime, opt => opt.MapFrom(src => DateTime.SpecifyKind(src.EndTime, DateTimeKind.Utc)))
             .ReverseMap();
         
         CreateMap<ScreeningDto.Update, Screening>()

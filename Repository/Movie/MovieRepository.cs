@@ -49,7 +49,6 @@ public class MovieRepository : BaseRepository<MovieEn, int>
                 PosterUrl = posterUrl,
                 TrailerUrl = trailerUrl,
                 IsActive = true,
-                CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
             };
             
