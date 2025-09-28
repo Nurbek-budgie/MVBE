@@ -58,4 +58,24 @@ public class ScreenDto
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
     }
+    public class Screen
+    {
+        public int ScreenId { get; set; }
+        public string ScreenName { get; set; }
+        public List<Movie> Movies { get; set; }
+    }
+
+    public class Movie
+    {
+        public int MovieId { get; set; }
+        public string MovieTitle { get; set; }
+        public List<Showtime> Showtimes { get; set; }
+    }
+
+    public class Showtime
+    {
+        public int ShowtimeId { get; set; }
+        public DateTime StartTime { get; set; }
+        public decimal BasePrice { get; set; }
+    }
 }

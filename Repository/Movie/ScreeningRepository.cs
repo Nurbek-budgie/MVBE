@@ -17,6 +17,17 @@ public class ScreeningRepository : BaseRepository<Screening, int>
         return screening;
     }
 
+    public async Task<Screening> GetScreeningByTheater(int theaterId)
+    {
+        var screeing = await _dbSet
+            .Include(x => x.Movie)
+            .Include(x => x.Screen)
+                .ThenInclude(x => x.Theater)
+            .FirstOrDefaultAsync(x => x.Screen.Theater.Id == theaterId);
+        
+        return screeing;
+    }
+
     public async Task<Screening> GetScreeningSeats(int screeningId)
     {
         return await _dbSet

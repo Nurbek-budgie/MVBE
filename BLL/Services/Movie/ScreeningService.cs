@@ -12,9 +12,9 @@ public class ScreeningService : IScreeningService
     private readonly ScreeningRepository _screeningRepository;
     private readonly IMapper _mapper;
 
-    public ScreeningService(ScreeningRepository screeningRepository, IMapper mapper)
+    public ScreeningService(ScreeningRepository screeningRepository, TheaterRepository theaterRepository, IMapper mapper)
     {
-        _screeningRepository = screeningRepository ?? throw new ArgumentNullException(nameof(screeningRepository));;
+        _screeningRepository = screeningRepository ?? throw new ArgumentNullException(nameof(screeningRepository));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
     }
     

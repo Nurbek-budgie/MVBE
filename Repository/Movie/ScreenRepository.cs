@@ -24,6 +24,19 @@ public class ScreenRepository : BaseRepository<Screen, int>
         return screen;
     }
 
+    public async Task<IEnumerable<Screen>> GetByScreenTheaterById(int theaterId)
+    {
+        var screen = await _dbSet
+            .Include(s => s.Screenings)
+                .ThenInclude(m => m.Movie)
+            .Include(s => s.Theater)
+            .Include(s => s.Seats)
+            .Where(s => s.Theater.Id == theaterId)
+            .ToListAsync();
+        
+        return screen;
+    }
+
     public async Task<IEnumerable<Screen>> GetAllActiveScreens()
     {
         var screens = _dbSet.Where(s => s.IsActive == true).ToListAsync();

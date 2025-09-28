@@ -81,6 +81,11 @@ public class AutoMapperProfile : Profile
         CreateMap<ScreenDto.Read, Screen>()
             .ReverseMap();
         
+        CreateMap<ScreenDto.Screen, Screen>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.ScreenId))
+            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.ScreenName))
+            .ReverseMap();
+        
         CreateMap<ScreenDto.List, Screen>()
             .ReverseMap();
         

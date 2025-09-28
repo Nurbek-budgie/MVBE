@@ -156,4 +156,6 @@ public class MovieDto
         public DateTime StartTime { get; set; }
         public decimal BasePrice { get; set; }
     }
+    
+    
 }

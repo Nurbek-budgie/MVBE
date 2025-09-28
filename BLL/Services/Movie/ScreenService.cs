@@ -77,6 +77,40 @@ public class ScreenService : IScreenService
         return _mapper.Map<IEnumerable<ScreenDto.List>>(screens);
     }
 
+    public async Task<IEnumerable<ScreenDto.Read>> GetScreenByTheaterIdAsync(int theaterId)
+    {
+        var screen = await _screenRepository.GetByScreenTheaterById(theaterId);
+        
+        var screens = _mapper.Map<IEnumerable<ScreenDto.Read>>(screen);
+        return screens;
+    }
+
+    public async Task<IEnumerable<ScreenDto.Screen>> GetScreenbyTheaterShowtimesIdAsync(int theaterId)
+    {
+        var screen = await _screenRepository.GetByScreenTheaterById(theaterId);
+        
+        var dtoList = screen.Select(screen => new ScreenDto.Screen
+        {
+            ScreenId = screen.Id,
+            ScreenName = screen.Name,
+            Movies = screen.Screenings
+                .GroupBy(s => s.Movie)
+                .Select(group => new ScreenDto.Movie
+                {
+                    MovieId = group.Key.Id,
+                    MovieTitle = group.Key.Title,
+                    Showtimes = group.Select(screening => new ScreenDto.Showtime
+                    {
+                        ShowtimeId = screening.Id,
+                        StartTime = screening.StartTime,
+                        BasePrice = screening.BasePrice
+                    }).ToList()
+                }).ToList()
+        }).ToList();
+        
+        return dtoList;
+    }
+
     public async Task<IEnumerable<ScreenDto.List>> GetAllActiveScreens()
     {
         var screens = await _screenRepository.GetAllActiveScreens();

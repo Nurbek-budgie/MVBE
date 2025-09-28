@@ -44,6 +44,20 @@ public class ScreenController : ControllerBase
     }
     
     [HttpGet]
+    [Route("/screen/theatershowtimd")]
+    public async Task<IEnumerable<ScreenDto.Screen>> GetScreensByTheaterShowtimesIdAsync(int theaterId)
+    {
+        return await _screenService.GetScreenbyTheaterShowtimesIdAsync(theaterId);
+    }
+    
+    [HttpGet]
+    [Route("/screen/theater")]
+    public async Task<IEnumerable<ScreenDto.Read>> GetScreensByTheaterIdAsync(int theaterId)
+    {
+        return await _screenService.GetScreenByTheaterIdAsync(theaterId);
+    }
+    
+    [HttpGet]
     [Route("/screens/type/{type}")]
     public async Task<IEnumerable<ScreenTypeDto.Cinema>> GetScreenTypeAsync(ScreenType type)
     {
