@@ -1,4 +1,6 @@
+using API.Configurations;
 using BLL.Interfaces.Movie;
+using Common.Enums;
 using Common.Enums.MovieEnums;
 using DTO.MovieDTOS;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +17,7 @@ public class ScreenController : ControllerBase
         _screenService = screenService;
     }
 
+    [AuthorizeRole(ERoles.Admin, ERoles.Manager)]
     [HttpPost]
     [Route("/screen/create")]
     public async Task<ScreenDto.Read> CreateScreen([FromQuery] ScreenDto.Create screenDto)
@@ -22,6 +25,7 @@ public class ScreenController : ControllerBase
         return await _screenService.CreateScreenAsync(screenDto);
     }
     
+    [AuthorizeRole(ERoles.Admin, ERoles.Manager)]
     [HttpPut]
     [Route("/screen/update")]
     public async Task<ScreenDto.Read> UpdateScreen([FromQuery] int id,[FromQuery] ScreenDto.Update screenDto)
@@ -43,18 +47,46 @@ public class ScreenController : ControllerBase
         return await _screenService.GetAllScreens();
     }
     
+    [AuthorizeRole(ERoles.Admin, ERoles.Manager)]
     [HttpGet]
     [Route("/screen/theatershowtimd")]
-    public async Task<IEnumerable<ScreenDto.Screen>> GetScreensByTheaterShowtimesIdAsync(int theaterId)
+    public async Task<IEnumerable<ScreenDto.Screen>> GetScreensByTheaterShowtimesIdAsync([FromQuery] int? theaterId = null)
     {
-        return await _screenService.GetScreenbyTheaterShowtimesIdAsync(theaterId);
+        // If user is a Manager, override theaterId from JWT claim
+        if (User.IsInRole(ERoles.Manager.ToString()))
+        {
+            var theaterClaim = User.FindFirst("theaterId")?.Value;
+            if (theaterClaim == null)
+                throw new UnauthorizedAccessException("No theater assigned to this manager.");
+
+            theaterId = int.Parse(theaterClaim);
+        }
+
+        if (!theaterId.HasValue)
+            throw new ArgumentException("TheaterId is required for Admins.");
+
+        return await _screenService.GetScreenbyTheaterShowtimesIdAsync(theaterId.Value);
     }
     
+    [AuthorizeRole(ERoles.Admin, ERoles.Manager)]
     [HttpGet]
     [Route("/screen/theater")]
-    public async Task<IEnumerable<ScreenDto.Read>> GetScreensByTheaterIdAsync(int theaterId)
+    public async Task<IEnumerable<ScreenDto.Read>> GetScreensByTheaterIdAsync([FromQuery] int? theaterId = null)
     {
-        return await _screenService.GetScreenByTheaterIdAsync(theaterId);
+        // If user is a Manager, override theaterId from JWT claim
+        if (User.IsInRole(ERoles.Manager.ToString()))
+        {
+            var theaterClaim = User.FindFirst("theaterId")?.Value;
+            if (theaterClaim == null)
+                throw new UnauthorizedAccessException("No theater assigned to this manager.");
+
+            theaterId = int.Parse(theaterClaim);
+        }
+
+        if (!theaterId.HasValue)
+            throw new ArgumentException("TheaterId is required for Admins.");
+        
+        return await _screenService.GetScreenByTheaterIdAsync(theaterId.Value);
     }
     
     [HttpGet]
@@ -71,6 +103,7 @@ public class ScreenController : ControllerBase
         return await _screenService.GetAllActiveScreens();
     }
 
+    [AuthorizeRole(ERoles.Admin, ERoles.Manager)]
     [HttpDelete]
     [Route("/screens/{id}")]
     public async Task<bool> DeleteScreen(int id)

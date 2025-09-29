@@ -7,4 +7,6 @@ namespace BLL.Interfaces.Identity;
 public interface IIdentityService
 {
     public Task<IdentityResult> CreateUserAsync(UserDto.Register userDto, ERoles role);
+    Task<bool> AssignTheaterToManagerAsync(Guid managerId, int theaterId);
+    Task<IEnumerable<UserDto.ManagerList>> GetManagersAsync();
 }

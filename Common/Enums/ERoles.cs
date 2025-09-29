@@ -6,5 +6,6 @@ public enum ERoles
 {
     [Description("admin")] Admin = 1,
     [Description("client")] Client = 2,
-    [Description("audience")] Audience = 3
+    [Description("audience")] Audience = 3,
+    [Description("manager")] Manager = 4
 }

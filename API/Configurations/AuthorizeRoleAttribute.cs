@@ -34,18 +34,32 @@ public class AuthorizeRoleAttribute : AuthorizeAttribute, IAsyncActionFilter
        // TODO check token validation parameters
        try
        {
-           var jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+           // var jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+           //
+           // var roleFromToken = jwtToken.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Role || x.Type == "role")?.Value.ToLower();
+           // var roleFromEnum = Enum.GetValues(typeof(ERoles))
+           //     .Cast<ERoles>()
+           //     .Where(role => _roles.Contains(role)) 
+           //     .Select(role => role.GetDescription())
+           //     .ToArray();
+           //
+           // if (string.IsNullOrEmpty(roleFromToken) || !roleFromEnum.Contains(roleFromToken))
+           // {
+           //     context.Result = new StatusCodeResult(StatusCodes.Status401Unauthorized);
+           // }
            
-           var roleFromToken = jwtToken.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Role || x.Type == "role")?.Value.ToLower();
-           var roleFromEnum = Enum.GetValues(typeof(ERoles))
-               .Cast<ERoles>()
-               .Where(role => _roles.Contains(role)) 
-               .Select(role => role.GetDescription())
-               .ToArray();
+           var jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
 
-           if (string.IsNullOrEmpty(roleFromToken) || !roleFromEnum.Contains(roleFromToken))
+           var roleFromToken = jwtToken.Claims
+               .FirstOrDefault(x => x.Type == ClaimTypes.Role || x.Type == "role")?.Value
+               ?.ToLower();
+
+           var allowedRoles = _roles.Select(r => r.ToString().ToLower()).ToArray(); 
+
+           if (string.IsNullOrEmpty(roleFromToken) || !allowedRoles.Contains(roleFromToken))
            {
                context.Result = new StatusCodeResult(StatusCodes.Status401Unauthorized);
+               return;
            }
            
            await next();

@@ -19,7 +19,7 @@ public class UserController : ControllerBase
     [HttpPost("RegisterClient")]
     public async Task<IActionResult> CreateClient(UserDto.Register userDto)
     {
-        var result = await _identityService.CreateUserAsync(userDto, ERoles.Client);
+        var result = await _identityService.CreateUserAsync(userDto, ERoles.Audience);
         return Ok(result);
     }
 }

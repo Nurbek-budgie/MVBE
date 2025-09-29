@@ -1,4 +1,6 @@
+using API.Configurations;
 using BLL.Interfaces.Movie;
+using Common.Enums;
 using DTO.MovieDTOS;
 using DTO.Reservation;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +17,7 @@ public class ScreeningController : ControllerBase
         _screeningService = screeningService;
     }
 
+    [AuthorizeRole(ERoles.Admin, ERoles.Manager)]
     [HttpPost]
     [Route("/screening/create")]
     public async Task<ScreeningDto.Read> CreateScreening(ScreeningDto.Create screening)
@@ -22,6 +25,7 @@ public class ScreeningController : ControllerBase
         return await _screeningService.CreateScreeningAsync(screening);
     }
 
+    [AuthorizeRole(ERoles.Admin, ERoles.Manager)]
     [HttpPut]
     [Route("/screening/update")]
     public async Task<ScreeningDto.Read> UpdateScreening(int id, ScreeningDto.Update screening)
@@ -58,6 +62,7 @@ public class ScreeningController : ControllerBase
         return await _screeningService.GetAllScreeningAsync();
     }
 
+    [AuthorizeRole(ERoles.Admin, ERoles.Manager)]
     [HttpDelete]
     [Route("/screenings/delete/{id}")]
     public async Task<bool> DeleteScreening(int id)

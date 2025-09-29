@@ -23,7 +23,7 @@ public class ValuesController : ControllerBase
         return Ok($"Hello {User.Identity.Name}, this is protected.");
     }
     
-    [AuthorizeRole(ERoles.Client)]
+    [AuthorizeRole(ERoles.Audience)]
     [HttpGet("Client")]
     public IActionResult SecureEndpointClient()
     {
@@ -37,7 +37,7 @@ public class ValuesController : ControllerBase
         return Ok($"Hello {User.Identity.Name}, this is protected.");
     }
     
-    [AuthorizeRole(ERoles.Admin, ERoles.Audience, ERoles.Client)]
+    [AuthorizeRole(ERoles.Admin, ERoles.Audience, ERoles.Audience)]
     [HttpGet("ANYROLEsecure")]
     public IActionResult SecureEndpointANYROLE()
     {

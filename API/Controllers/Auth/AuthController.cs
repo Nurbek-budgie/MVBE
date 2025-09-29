@@ -21,10 +21,4 @@ public class AuthController: ControllerBase
         var token = await _service.LoginAsync(dto);
         return Ok(new { token });
     }
-
-    // [HttpPost("getalluserspassword")]
-    // public async Task<IActionResult> GetAllpost()
-    // {
-    //     
-    // }
 }

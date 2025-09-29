@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace DTO.Auth;
 
@@ -40,6 +41,7 @@ public class AuthDto
         
         public DateTime RefreshTokenExpires { get; set; }
         
+        [JsonPropertyName("roles")]
         public IEnumerable<string> Roles { get; set; }
     }
     

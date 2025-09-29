@@ -16,6 +16,7 @@ public class AutoMapperProfile : Profile
         CreateMap<User, UserDto.Register>()
             .ForMember(x => x.email, y => y.MapFrom(z => z.Email))
             .ForMember(x => x.username, y => y.MapFrom(z => z.UserName))
+            .ForMember(x => x.TheaterId, y => y.MapFrom(z => z.TheaterId))
             .ReverseMap()
             .AfterMap((uDTO, uModel) => uModel.NormalizedEmail = uDTO.email.ToUpper())
             .AfterMap((uDTO, uModel) => uModel.NormalizedUserName = uDTO.username.ToUpper());

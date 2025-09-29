@@ -1,4 +1,6 @@
+using API.Configurations;
 using BLL.Interfaces.Movie;
+using Common.Enums;
 using DTO.MovieDTOS;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,6 +16,7 @@ public class FeaturedMovieController : ControllerBase
         _featuredMovieService = featuredMovieService;
     }
 
+    [AuthorizeRole(ERoles.Admin)]
     [HttpPost]
     [Route("/api/FeaturedMovie/create")]
     public async Task<FeaturedMovieDto.Read> AddFeaturedMovie(FeaturedMovieDto.Create featuredMovieDto)
@@ -21,6 +24,7 @@ public class FeaturedMovieController : ControllerBase
         return await _featuredMovieService.AddFeaturedMovie(featuredMovieDto);
     }
 
+    [AuthorizeRole(ERoles.Admin)]
     [HttpPut]
     [Route("/api/FeaturedMovie/change/{id}")]
     public async Task<FeaturedMovieDto.Read> ChangePositionMovie(int id, FeaturedMovieDto.Update featuredMovieDto)
@@ -35,6 +39,7 @@ public class FeaturedMovieController : ControllerBase
         return await _featuredMovieService.ListOfFeaturedMovies();
     }
 
+    [AuthorizeRole(ERoles.Admin)]
     [HttpDelete]
     [Route("/api/FeaturedMovie/edit/{id}")]
     public async Task<bool> RemoveFeaturedMovie(int id)
@@ -42,6 +47,7 @@ public class FeaturedMovieController : ControllerBase
         return await _featuredMovieService.RemoveFeaturedMovie(id);
     }
 
+    [AuthorizeRole(ERoles.Admin)]
     [HttpDelete]
     [Route("/api/FeaturedMovie/removeAll")]
     public async Task<bool> RemoveAllFeaturedMovies()

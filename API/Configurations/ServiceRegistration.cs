@@ -76,8 +76,9 @@ public static class ServiceRegistration
         .AddDefaultTokenProviders();
         
         var jwtSettings = configuration.GetSection("Jwt");
-        var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
-        
+        // var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
+        var key = Encoding.UTF8.GetBytes(configuration["Jwt:Key"]);
+
         services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

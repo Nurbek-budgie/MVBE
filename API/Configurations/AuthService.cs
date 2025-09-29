@@ -51,7 +51,13 @@ public class AuthService
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new(ClaimTypes.Email, username)
         };
+        if (user.TheaterId.HasValue)
+        {
+            claims.Add(new Claim("theaterId", user.TheaterId.Value.ToString()));
+        }
+        
         claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+        claims.AddRange(roles.Select(r => new Claim("role", r)));
         return (user, claims, roles);
     }
 

@@ -1,5 +1,8 @@
+using API.Configurations;
 using BLL.Interfaces.Movie;
+using Common.Enums;
 using DTO.MovieDTOS;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers.Movie;
@@ -14,6 +17,7 @@ public class MovieController : ControllerBase
         _movieService = movieService;
     }
 
+    [AuthorizeRole(ERoles.Admin)]
     [HttpPost]
     [Route("/api/createmovie")]
     public async Task<MovieDto.Read> CreateMovie(MovieDto.Create movieDto)
@@ -65,6 +69,7 @@ public class MovieController : ControllerBase
         return await _movieService.GetMovieByIdWithScreenings(id);
     }
     
+    [AuthorizeRole(ERoles.Admin)]
     [HttpPut]
     [Route("/api/movieupdate")]
     public async Task<MovieDto.Read> UpdateMovie(int id, MovieDto.Update movieDto)
@@ -72,6 +77,7 @@ public class MovieController : ControllerBase
         return await _movieService.UpdateMovieAsync(id, movieDto);
     }
 
+    [AuthorizeRole(ERoles.Admin)]
     [HttpDelete]
     [Route("/api/moviedelete")]
     public async Task<bool> DeleteMovie(int id)
