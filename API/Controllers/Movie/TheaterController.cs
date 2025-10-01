@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace API.Controllers.Movie;
 
 [ApiController]
+[Route("api/theaters")]
 public class TheaterController : ControllerBase
 {
     private readonly ITheaterService _theaterService;
@@ -16,56 +17,71 @@ public class TheaterController : ControllerBase
         _theaterService = theaterService;
     }
 
+    // POST /api/theaters
     [AuthorizeRole(ERoles.Admin)]
     [HttpPost]
-    [Route("/api/theater/add")]
-    public async Task<TheaterDto.Read> CreateTheater(TheaterDto.Create theater)
+    public async Task<ActionResult<TheaterDto.Read>> CreateTheater([FromBody] TheaterDto.Create theater)
     {
-        return await _theaterService.CreateAsync(theater);
+        var created = await _theaterService.CreateAsync(theater);
+        if (created == null) return BadRequest("Unable to create theater");
+        return CreatedAtAction(nameof(GetTheater), new { id = created.Id }, created);
     }
 
+    // PUT /api/theaters/{id}/logo
     [AuthorizeRole(ERoles.Admin)]
-    [HttpPut]
-    [Route("/api/theater/update/logo")]
-    public async Task<TheaterDto.Read> UploadLogo(int id, IFormFile logo)
+    [HttpPut("{id:int}/logo")]
+    public async Task<ActionResult<TheaterDto.Read>> UploadLogo(int id, IFormFile logo)
     {
-        return await _theaterService.UploadLogoImage(id, logo);
+        var result = await _theaterService.UploadLogoImage(id, logo);
+        if (result == null) return NotFound("Theater not found");
+        return Ok(result);
     }
-    
+
+    // PUT /api/theaters/{id}
     [AuthorizeRole(ERoles.Admin)]
-    [HttpPut]
-    [Route("/api/theater/update")]
-    public async Task<TheaterDto.Read> UpdateTheater(int id, TheaterDto.Update theater)
+    [HttpPut("{id:int}")]
+    public async Task<ActionResult<TheaterDto.Read>> UpdateTheater(int id, [FromBody] TheaterDto.Update theater)
     {
-        return await _theaterService.UpdateAsync(id, theater);
+        var result = await _theaterService.UpdateAsync(id, theater);
+        if (result == null) return NotFound("Theater not found");
+        return Ok(result);
     }
 
+    // GET /api/theaters?active=true
     [HttpGet]
-    [Route("/api/theaters")]
-    public async Task<IEnumerable<TheaterDto.List>> GetAllTheaters()
+    public async Task<ActionResult<IEnumerable<TheaterDto.List>>> GetAllTheaters([FromQuery] bool? active)
     {
-        return await _theaterService.GetAllTheatersAsync();
+        IEnumerable<TheaterDto.List> theaters;
+
+        if (active == true)
+        {
+            theaters = await _theaterService.GetAllActiveTheatersAsync();
+        }
+        else
+        {
+            theaters = await _theaterService.GetAllTheatersAsync();
+        }
+
+        if (theaters == null || !theaters.Any()) return NotFound("No theaters found");
+        return Ok(theaters);
     }
 
-    [HttpGet]
-    [Route("/api/theaters/active")]
-    public async Task<IEnumerable<TheaterDto.List>> GetAllActiveTheaters()
+    // GET /api/theaters/{id}
+    [HttpGet("{id:int}")]
+    public async Task<ActionResult<TheaterDto.Read>> GetTheater(int id)
     {
-        return await _theaterService.GetAllActiveTheatersAsync();
+        var theater = await _theaterService.GetTheaterAsync(id);
+        if (theater == null) return NotFound("Theater not found");
+        return Ok(theater);
     }
 
-    [HttpGet]
-    [Route("/api/theater/{id}")]
-    public async Task<TheaterDto.Read> Get(int id)
-    {
-        return await _theaterService.GetTheaterAsync(id);
-    }
-
+    // DELETE /api/theaters/{id}
     [AuthorizeRole(ERoles.Admin)]
-    [HttpDelete]
-    [Route("/api/theater/delete")]
-    public async Task<bool> DeleteTheater(int id)
+    [HttpDelete("{id:int}")]
+    public async Task<ActionResult> DeleteTheater(int id)
     {
-        return await _theaterService.DeleteTheater(id);
+        var deleted = await _theaterService.DeleteTheater(id);
+        if (!deleted) return NotFound("Theater not found");
+        return NoContent();
     }
 }

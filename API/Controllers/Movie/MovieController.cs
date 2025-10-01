@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace API.Controllers.Movie;
 
 [ApiController]
+[Route("api/movies")]
 public class MovieController : ControllerBase
 {
     private readonly IMovieService _movieService;
@@ -17,71 +18,75 @@ public class MovieController : ControllerBase
         _movieService = movieService;
     }
 
+    // POST /api/movies
     [AuthorizeRole(ERoles.Admin)]
     [HttpPost]
-    [Route("/api/createmovie")]
-    public async Task<MovieDto.Read> CreateMovie(MovieDto.Create movieDto)
+    public async Task<ActionResult<MovieDto.Read>> CreateMovie([FromBody]MovieDto.Create movieDto)
     {
         var movie = await _movieService.CreateMovieAsync(movieDto);
+
+        if (movie == null) return BadRequest();
         
-        return movie;
+        return Ok(movie);
     }
     
+    // GET /api/movies
     [HttpGet]
-    [Route("/api/movies")]
-    public async Task<IEnumerable<MovieDto.List>> GetAllMovies()
+    public async Task<ActionResult<IEnumerable<MovieDto.List>>> GetAllMovies([FromQuery] bool? active)
     {
-        return await _movieService.GetAllMoviesAsync();
+        if (!active.HasValue) return Ok(await _movieService.GetAllMoviesAsync());
+        return Ok(await _movieService.GetActiveMoviesAsync());
     }
 
+    // GET /api/movies/{id}
     [HttpGet]
-    [Route("/api/activemovies")]
-    public async Task<IEnumerable<MovieDto.List>> GetActiveMovies()
+    [Route("{id:int}/theaters")]
+    public async Task<ActionResult<IEnumerable<CinemaDto.Theater>>> GetMovieGroupedByTheater(int movieId)
     {
-        return await _movieService.GetActiveMoviesAsync();
+        var movies = await _movieService.GetMovieGroupedByTheater(movieId);
+        if (movies == null) return NotFound();
+        return Ok(movies);
     }
     
+    // GET /api/movies/{id}/screenings
     [HttpGet]
-    [Route("/api/genremovies")]
-    public async Task<IEnumerable<MovieDto.List>> GetMovieGenres(string genre)
+    [Route("{id:int}")]
+    public async Task<ActionResult<MovieDto.Read>> GetMovie(int id)
     {
-        return await _movieService.GetMoviesByGenreAsync(genre);
+        var movie = await _movieService.GetMovieByIdAsync(id);
+        if (movie == null) return NotFound();
+        return Ok(movie);
     }
 
+    // GET /api/movies/{id}/theaters
     [HttpGet]
-    [Route("/api/groupedmovies")]
-    public async Task<IEnumerable<CinemaDto.Theater>> GetMOvv(int movieId)
+    [Route("{id:int}/screenings")]
+    public async Task<ActionResult<MovieDto.ReadWithScreenings>> GetMovieWithScreenings(int id)
     {
-        return await _movieService.Getmov(movieId);
+        var movie = await _movieService.GetMovieByIdWithScreenings(id);
+        
+        if (movie == null) return NotFound();
+        
+        return Ok(movie);
     }
     
-    [HttpGet]
-    [Route("/api/movies/{id}")]
-    public async Task<MovieDto.Read> GetMovie(int id)
-    {
-        return await _movieService.GetMovieByIdAsync(id);
-    }
-
-    [HttpGet]
-    [Route("/api/moviesscre/{id}")]
-    public async Task<MovieDto.ReadWithScreenings> GetMovieeee(int id)
-    {
-        return await _movieService.GetMovieByIdWithScreenings(id);
-    }
-    
+    // PUT /api/movies/{id}
     [AuthorizeRole(ERoles.Admin)]
-    [HttpPut]
-    [Route("/api/movieupdate")]
-    public async Task<MovieDto.Read> UpdateMovie(int id, MovieDto.Update movieDto)
+    [HttpPut("{id:int}")]
+    public async Task<ActionResult<MovieDto.Read>> UpdateMovie(int id,[FromBody] MovieDto.Update movieDto)
     {
-        return await _movieService.UpdateMovieAsync(id, movieDto);
+        var updated = await _movieService.UpdateMovieAsync(id, movieDto);
+        if (updated == null) return NotFound();
+        return Ok(updated);
     }
 
+    // DELETE /api/movies/{id}
     [AuthorizeRole(ERoles.Admin)]
-    [HttpDelete]
-    [Route("/api/moviedelete")]
-    public async Task<bool> DeleteMovie(int id)
+    [HttpDelete("{id:int}")]
+    public async Task<ActionResult<bool>> DeleteMovie(int id)
     {
-        return await _movieService.DeleteMovieAsync(id);
+        var deleted = await _movieService.DeleteMovieAsync(id);
+        if (!deleted) return NotFound();
+        return NoContent();
     }
 }

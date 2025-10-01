@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace API.Controllers.Movie;
 
 [ApiController]
+[Route("api/screens")]
 public class ScreenController : ControllerBase
 {
     private readonly IScreenService _screenService;
@@ -17,97 +18,109 @@ public class ScreenController : ControllerBase
         _screenService = screenService;
     }
 
+    // POST /api/screen
     [AuthorizeRole(ERoles.Admin, ERoles.Manager)]
     [HttpPost]
-    [Route("/screen/create")]
-    public async Task<ScreenDto.Read> CreateScreen([FromQuery] ScreenDto.Create screenDto)
+    public async Task<ActionResult<ScreenDto.Read>> CreateScreen([FromBody] ScreenDto.Create screenDto)
     {
-        return await _screenService.CreateScreenAsync(screenDto);
+        var result = await _screenService.CreateScreenAsync(screenDto);
+        if (result == null) return BadRequest("Unable to create screen");
+        return Ok(result);
     }
     
+    // PUT /api/screen/{id}
     [AuthorizeRole(ERoles.Admin, ERoles.Manager)]
-    [HttpPut]
-    [Route("/screen/update")]
-    public async Task<ScreenDto.Read> UpdateScreen([FromQuery] int id,[FromQuery] ScreenDto.Update screenDto)
+    [HttpPut("{id:int}")]
+    public async Task<ActionResult<ScreenDto.Read>> UpdateScreen(int id, [FromBody] ScreenDto.Update screenDto)
     {
-        return await _screenService.UpdateScreenAsync(id, screenDto);
+        var result = await _screenService.UpdateScreenAsync(id, screenDto);
+        if (result == null) return NotFound("Screen not found");
+        return Ok(result);
     }
     
-    [HttpGet]
-    [Route("/screen/{id}")]
-    public async Task<ScreenDto.Read> GetScreenIdAsync(int id)
+    // GET /api/screen/{id}
+    [HttpGet("{id:int}")]
+    public async Task<ActionResult<ScreenDto.Read>> GetScreenIdAsync(int id)
     {
-        return await _screenService.GetScreenByIdAsync(id);
+        var result = await _screenService.GetScreenByIdAsync(id);
+        if (result == null) return NotFound("Screen not found");
+        return Ok(result);
     }
     
+    // GET /api/screen?active=true
     [HttpGet]
-    [Route("/screens")]
-    public async Task<IEnumerable<ScreenDto.List>> GetScreensAsync()
+    public async Task<ActionResult<IEnumerable<ScreenDto.List>>> GetScreensAsync([FromQuery] bool? active)
     {
-        return await _screenService.GetAllScreens();
-    }
-    
-    [AuthorizeRole(ERoles.Admin, ERoles.Manager)]
-    [HttpGet]
-    [Route("/screen/theatershowtimd")]
-    public async Task<IEnumerable<ScreenDto.Screen>> GetScreensByTheaterShowtimesIdAsync([FromQuery] int? theaterId = null)
-    {
-        // If user is a Manager, override theaterId from JWT claim
-        if (User.IsInRole(ERoles.Manager.ToString()))
+        if (!active.HasValue)
         {
-            var theaterClaim = User.FindFirst("theaterId")?.Value;
-            if (theaterClaim == null)
-                throw new UnauthorizedAccessException("No theater assigned to this manager.");
-
-            theaterId = int.Parse(theaterClaim);
+            var result = await _screenService.GetAllScreens();
+            if (result == null || !result.Any()) return NotFound("No screens found");
+            return Ok(result);
         }
-
-        if (!theaterId.HasValue)
-            throw new ArgumentException("TheaterId is required for Admins.");
-
-        return await _screenService.GetScreenbyTheaterShowtimesIdAsync(theaterId.Value);
-    }
-    
-    [AuthorizeRole(ERoles.Admin, ERoles.Manager)]
-    [HttpGet]
-    [Route("/screen/theater")]
-    public async Task<IEnumerable<ScreenDto.Read>> GetScreensByTheaterIdAsync([FromQuery] int? theaterId = null)
-    {
-        // If user is a Manager, override theaterId from JWT claim
-        if (User.IsInRole(ERoles.Manager.ToString()))
-        {
-            var theaterClaim = User.FindFirst("theaterId")?.Value;
-            if (theaterClaim == null)
-                throw new UnauthorizedAccessException("No theater assigned to this manager.");
-
-            theaterId = int.Parse(theaterClaim);
-        }
-
-        if (!theaterId.HasValue)
-            throw new ArgumentException("TheaterId is required for Admins.");
         
-        return await _screenService.GetScreenByTheaterIdAsync(theaterId.Value);
+        var activeResult = await _screenService.GetAllActiveScreens();
+        if (activeResult == null || !activeResult.Any()) return NotFound("No active screens found");
+        return Ok(activeResult);
     }
     
-    [HttpGet]
-    [Route("/screens/type/{type}")]
-    public async Task<IEnumerable<ScreenTypeDto.Cinema>> GetScreenTypeAsync(ScreenType type)
+    // GET /api/screen/theater-screens
+    [AuthorizeRole(ERoles.Admin, ERoles.Manager)]
+    [HttpGet("theater-screens")]
+    public async Task<ActionResult<IEnumerable<ScreenDto.Screen>>> GetScreensByTheaterShowtimesIdAsync([FromQuery] int? theaterId = null)
     {
-        return await _screenService.GetScreenTypeTheaterAsync(type);
+        if (User.IsInRole(ERoles.Manager.ToString()))
+        {
+            var theaterClaim = User.FindFirst("theaterId")?.Value;
+            if (theaterClaim == null) return Unauthorized("No theater assigned to this manager.");
+
+            theaterId = int.Parse(theaterClaim);
+        }
+
+        if (!theaterId.HasValue)
+            return BadRequest("TheaterId is required for Admins.");
+
+        var result = await _screenService.GetScreenbyTheaterShowtimesIdAsync(theaterId.Value);
+        if (result == null || !result.Any()) return NotFound("No screens found");
+        return Ok(result);
     }
     
-    [HttpGet]
-    [Route("/screens/active")]
-    public async Task<IEnumerable<ScreenDto.List>> GetActiveScreensAsync()
+    // GET /api/screen/theater
+    [AuthorizeRole(ERoles.Admin, ERoles.Manager)]
+    [HttpGet("theater")]
+    public async Task<ActionResult<IEnumerable<ScreenDto.Read>>> GetScreensByTheaterIdAsync([FromQuery] int? theaterId = null)
     {
-        return await _screenService.GetAllActiveScreens();
+        if (User.IsInRole(ERoles.Manager.ToString()))
+        {
+            var theaterClaim = User.FindFirst("theaterId")?.Value;
+            if (theaterClaim == null) return Unauthorized("No theater assigned to this manager.");
+
+            theaterId = int.Parse(theaterClaim);
+        }
+
+        if (!theaterId.HasValue)
+            return BadRequest("TheaterId is required for Admins.");
+
+        var result = await _screenService.GetScreenByTheaterIdAsync(theaterId.Value);
+        if (result == null || !result.Any()) return NotFound("No screens found");
+        return Ok(result);
+    }
+    
+    // GET /api/screen/type/{type}
+    [HttpGet("type/{type}")]
+    public async Task<ActionResult<IEnumerable<ScreenTypeDto.Cinema>>> GetScreenTypeAsync(ScreenType type)
+    {
+        var result = await _screenService.GetScreenTypeTheaterAsync(type);
+        if (result == null || !result.Any()) return NotFound("No screens of this type found");
+        return Ok(result);
     }
 
+    // DELETE /api/screen/{id}
     [AuthorizeRole(ERoles.Admin, ERoles.Manager)]
-    [HttpDelete]
-    [Route("/screens/{id}")]
-    public async Task<bool> DeleteScreen(int id)
+    [HttpDelete("{id:int}")]
+    public async Task<ActionResult> DeleteScreen(int id)
     {
-        return await _screenService.DeleteScreenAsync(id);
+        var result = await _screenService.DeleteScreenAsync(id);
+        if (!result) return NotFound("Screen not found");
+        return NoContent();
     }
 }

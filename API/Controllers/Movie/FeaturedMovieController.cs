@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace API.Controllers.Movie;
 
 [ApiController]
+[Route("api/featuredmovies")]
 public class FeaturedMovieController : ControllerBase
 {
     private readonly IFeaturedMovieService _featuredMovieService;
@@ -16,42 +17,49 @@ public class FeaturedMovieController : ControllerBase
         _featuredMovieService = featuredMovieService;
     }
 
+    // POST /api/featuredMovie
     [AuthorizeRole(ERoles.Admin)]
     [HttpPost]
-    [Route("/api/FeaturedMovie/create")]
-    public async Task<FeaturedMovieDto.Read> AddFeaturedMovie(FeaturedMovieDto.Create featuredMovieDto)
+    public async Task<ActionResult<FeaturedMovieDto.Read>> AddFeaturedMovie([FromBody] FeaturedMovieDto.Create featuredMovieDto)
     {
-        return await _featuredMovieService.AddFeaturedMovie(featuredMovieDto);
+        var result = await _featuredMovieService.AddFeaturedMovie(featuredMovieDto);
+        if (result == null) return BadRequest("Could not add featured movie.");
+        return Ok(result);
     }
 
     [AuthorizeRole(ERoles.Admin)]
-    [HttpPut]
-    [Route("/api/FeaturedMovie/change/{id}")]
-    public async Task<FeaturedMovieDto.Read> ChangePositionMovie(int id, FeaturedMovieDto.Update featuredMovieDto)
+    [HttpPut("{id:int}/position")]
+    public async Task<ActionResult<FeaturedMovieDto.Read>> ChangePositionMovie(int id, [FromBody] FeaturedMovieDto.Update featuredMovieDto)
     {
-        return await _featuredMovieService.ChangePositionMovie(id, featuredMovieDto);
+        var result = await _featuredMovieService.ChangePositionMovie(id, featuredMovieDto);
+        if (result == null) return NotFound();
+        return Ok(result);
     }
+
 
     [HttpGet]
-    [Route("/api/FeaturedMovies")]
-    public async Task<IEnumerable<FeaturedMovieDto.Read>> ListOfFeaturedMovies()
+    public async Task<ActionResult<IEnumerable<FeaturedMovieDto.Read>>> ListOfFeaturedMovies()
     {
-        return await _featuredMovieService.ListOfFeaturedMovies();
+        var result = await _featuredMovieService.ListOfFeaturedMovies();
+        if (result == null || !result.Any()) return NotFound();
+        return Ok(result);
     }
 
     [AuthorizeRole(ERoles.Admin)]
-    [HttpDelete]
-    [Route("/api/FeaturedMovie/edit/{id}")]
-    public async Task<bool> RemoveFeaturedMovie(int id)
+    [HttpDelete("{id:int}")]
+    public async Task<ActionResult> RemoveFeaturedMovie(int id)
     {
-        return await _featuredMovieService.RemoveFeaturedMovie(id);
+        var result = await _featuredMovieService.RemoveFeaturedMovie(id);
+        if (result == null) return NotFound();
+        return NoContent();
     }
 
     [AuthorizeRole(ERoles.Admin)]
-    [HttpDelete]
-    [Route("/api/FeaturedMovie/removeAll")]
-    public async Task<bool> RemoveAllFeaturedMovies()
+    [HttpDelete("removeAll")]
+    public async Task<ActionResult> RemoveAllFeaturedMovies()
     {
-        return await _featuredMovieService.RemoveAllFeaturedMovies();
+        var result = await _featuredMovieService.RemoveAllFeaturedMovies();
+        if (!result) return BadRequest("Failed to remove all featured movies.");
+        return NoContent();
     }
 }

@@ -8,65 +8,77 @@ using Microsoft.AspNetCore.Mvc;
 namespace API.Controllers.Movie;
 
 [ApiController]
-public class ScreeningController : ControllerBase
+[Route("api/screenings")]
+public class ScreeningsController : ControllerBase
 {
     private readonly IScreeningService _screeningService;
 
-    public ScreeningController(IScreeningService screeningService)
+    public ScreeningsController(IScreeningService screeningService)
     {
         _screeningService = screeningService;
     }
 
+    // POST /api/screenings
     [AuthorizeRole(ERoles.Admin, ERoles.Manager)]
     [HttpPost]
-    [Route("/screening/create")]
-    public async Task<ScreeningDto.Read> CreateScreening(ScreeningDto.Create screening)
+    public async Task<ActionResult<ScreeningDto.Read>> CreateScreening([FromBody] ScreeningDto.Create screening)
     {
-        return await _screeningService.CreateScreeningAsync(screening);
+        var created = await _screeningService.CreateScreeningAsync(screening);
+        if (created == null) return BadRequest("Unable to create screening");
+        return Ok(created);
     }
 
+    // PUT /api/screenings/{id}
     [AuthorizeRole(ERoles.Admin, ERoles.Manager)]
-    [HttpPut]
-    [Route("/screening/update")]
-    public async Task<ScreeningDto.Read> UpdateScreening(int id, ScreeningDto.Update screening)
+    [HttpPut("{id:int}")]
+    public async Task<ActionResult<ScreeningDto.Read>> UpdateScreening(int id, [FromBody] ScreeningDto.Update screening)
     {
-        return await _screeningService.UpdateScreeningAsync(id, screening);
+        var updated = await _screeningService.UpdateScreeningAsync(id, screening);
+        if (updated == null) return NotFound("Screening not found");
+        return Ok(updated);
     }
 
-    [HttpGet]
-    [Route("/screening/{id}")]
+    // GET /api/screenings/{id}
+    [HttpGet("{id:int}")]
     public async Task<ActionResult<ScreeningDto.Read>> GetScreening(int id)
     {
-        return await _screeningService.GetScreeningIdAsync(id);
-    }
-    
-    [HttpGet]
-    [Route("/screening/seats/{id}")]
-    public async Task<ScreenSeatDto.Result> GetScreeningSeats(int id)
-    {
-        return await _screeningService.GetScreeningSeatsIdAsync(id);
+        var screening = await _screeningService.GetScreeningIdAsync(id);
+        if (screening == null) return NotFound("Screening not found");
+        return Ok(screening);
     }
 
-    
-    [HttpGet]
-    [Route("/screenings/active")]
-    public async Task<IEnumerable<ScreeningDto.List>> GetAllActiveScreeningAsync()
+    // GET /api/screenings/{id}/seats
+    [HttpGet("{id:int}/seats")]
+    public async Task<ActionResult<ScreenSeatDto.Result>> GetScreeningSeats(int id)
     {
-        return await _screeningService.GetAllActiveScreeningAsync();
-    }
-    
-    [HttpGet]
-    [Route("/screenings")]
-    public async Task<IEnumerable<ScreeningDto.List>> GetAllScreeningAsync()
-    {
-        return await _screeningService.GetAllScreeningAsync();
+        var seats = await _screeningService.GetScreeningSeatsIdAsync(id);
+        if (seats == null) return NotFound("Seats not found for this screening");
+        return Ok(seats);
     }
 
+    // GET /api/screenings?active=true
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<ScreeningDto.List>>> GetAllScreenings([FromQuery] bool? active)
+    {
+        if (active == true)
+        {
+            var activeScreenings = await _screeningService.GetAllActiveScreeningAsync();
+            if (activeScreenings == null || !activeScreenings.Any()) return NotFound("No active screenings found");
+            return Ok(activeScreenings);
+        }
+
+        var allScreenings = await _screeningService.GetAllScreeningAsync();
+        if (allScreenings == null || !allScreenings.Any()) return NotFound("No screenings found");
+        return Ok(allScreenings);
+    }
+
+    // DELETE /api/screenings/{id}
     [AuthorizeRole(ERoles.Admin, ERoles.Manager)]
-    [HttpDelete]
-    [Route("/screenings/delete/{id}")]
-    public async Task<bool> DeleteScreening(int id)
+    [HttpDelete("{id:int}")]
+    public async Task<ActionResult> DeleteScreening(int id)
     {
-        return await _screeningService.DeleteScreeningAsync(id);
+        var deleted = await _screeningService.DeleteScreeningAsync(id);
+        if (!deleted) return NotFound("Screening not found");
+        return NoContent();
     }
 }

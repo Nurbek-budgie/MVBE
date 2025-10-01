@@ -5,8 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace API.Controllers.Auth;
 
 [ApiController]
-[Route("api/[controller]")]
-public class AuthController: ControllerBase
+[Route("api/auth")]
+public class AuthController : ControllerBase
 {
     private readonly AuthService _service;
     
@@ -14,11 +14,16 @@ public class AuthController: ControllerBase
     {
         _service = service;
     }
-    
+
+    // POST /api/auth/login
     [HttpPost("login")]
-    public async Task<IActionResult> Login(AuthDto.Login dto)
+    public async Task<ActionResult> Login([FromBody] AuthDto.Login dto)
     {
         var token = await _service.LoginAsync(dto);
-        return Ok(new { token });
+
+        if (token == null)
+            return Unauthorized("Invalid username or password.");
+        
+        return Ok(token);
     }
 }

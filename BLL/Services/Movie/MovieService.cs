@@ -61,17 +61,8 @@ public class MovieService : IMovieService
             
             return dto;
         }
-
-        public async Task<IEnumerable<MovieDto.List>> GetMoviesByGenreAsync(string genre)
-        {
-            if (string.IsNullOrWhiteSpace(genre))
-                throw new ArgumentException("Genre cannot be null or empty", nameof(genre));
-
-            var movies = await _movieRepository.GetByGenreAsync(genre);
-            return _mapper.Map<IEnumerable<MovieDto.List>>(movies);
-        }
-
-        public async Task<IEnumerable<CinemaDto.Theater>> Getmov(int movieId)
+        
+        public async Task<IEnumerable<CinemaDto.Theater>> GetMovieGroupedByTheater(int movieId)
         {
             var movie = await _movieRepository.FetchMovieWithScreenings(movieId);
 

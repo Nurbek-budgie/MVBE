@@ -76,5 +76,4 @@ public class IdentityService : IIdentityService
             TheaterId = u.TheaterId
         });
     }
-
 }

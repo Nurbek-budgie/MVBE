@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace API.Controllers.Auth;
 
 [ApiController]
+[Route("api/[controller]")]
 public class UserController : ControllerBase
 {
     private readonly IIdentityService _identityService;
@@ -15,11 +16,12 @@ public class UserController : ControllerBase
         _identityService = identityService;
     }
     
-    // admin forgot password, change password, change data, delete admin.
-    [HttpPost("RegisterClient")]
-    public async Task<IActionResult> CreateClient(UserDto.Register userDto)
+    // POST /api/users
+    [HttpPost]
+    public async Task<ActionResult> CreateClient([FromBody] UserDto.Register userDto)
     {
         var result = await _identityService.CreateUserAsync(userDto, ERoles.Audience);
+        if (result == null) return BadRequest("Unable to create user");
         return Ok(result);
     }
 }

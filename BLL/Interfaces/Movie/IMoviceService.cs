@@ -7,8 +7,7 @@ public interface IMovieService
     Task<IEnumerable<MovieDto.List>> GetAllMoviesAsync();
     Task<IEnumerable<MovieDto.List>> GetActiveMoviesAsync();
     Task<MovieDto.Read?> GetMovieByIdAsync(int id);
-    Task<IEnumerable<MovieDto.List>> GetMoviesByGenreAsync(string genre);
-    Task<IEnumerable<CinemaDto.Theater>> Getmov(int movieId);
+    Task<IEnumerable<CinemaDto.Theater>> GetMovieGroupedByTheater(int movieId);
     Task<MovieDto.ReadWithScreenings> GetMovieByIdWithScreenings(int id);
     Task<MovieDto.Read> CreateMovieAsync(MovieDto.Create createMovieDto);
     Task<MovieDto.Read> UpdateMovieAsync(int id, MovieDto.Update updateMovieDto);

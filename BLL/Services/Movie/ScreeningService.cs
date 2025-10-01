@@ -21,11 +21,8 @@ public class ScreeningService : IScreeningService
     public async Task<ScreeningDto.Read> CreateScreeningAsync(ScreeningDto.Create screeningDto)
     {
         if (screeningDto == null) throw new ArgumentNullException(nameof(screeningDto));
-     
         var entity = _mapper.Map<Screening>(screeningDto);
-        
         var screening = await _screeningRepository.Create(entity);
-        
         return _mapper.Map<ScreeningDto.Read>(screening);
     }
 
