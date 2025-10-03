@@ -18,6 +18,9 @@ public class ScreenTypeDto
 
     public class Showtime
     {
+        public int ScreeningId { get; set; }
+        public string ScreenName { get; set; }
+        public decimal BasePrice { get; set; }
         public DateTime Time { get; set; }
     }
 }

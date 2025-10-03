@@ -2,7 +2,6 @@ using API.Configurations;
 using BLL.Interfaces.Movie;
 using Common.Enums;
 using DTO.MovieDTOS;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers.Movie;
@@ -41,9 +40,9 @@ public class MovieController : ControllerBase
     // GET /api/movies/{id}
     [HttpGet]
     [Route("{id:int}/theaters")]
-    public async Task<ActionResult<IEnumerable<CinemaDto.Theater>>> GetMovieGroupedByTheater(int movieId)
+    public async Task<ActionResult<IEnumerable<CinemaDto.Theater>>> GetMovieGroupedByTheater(int id)
     {
-        var movies = await _movieService.GetMovieGroupedByTheater(movieId);
+        var movies = await _movieService.GetMovieGroupedByTheater(id);
         if (movies == null) return NotFound();
         return Ok(movies);
     }

@@ -108,6 +108,9 @@ public class ScreenRepository : BaseRepository<Screen, int>
                         MovieName = movies.Key.Title,
                         Showtimes = movies.Select(showtimes => new ScreenTypeDto.Showtime
                         {
+                            ScreeningId = showtimes.Id,
+                            ScreenName = showtimes.Screen.Name,
+                            BasePrice = showtimes.BasePrice,
                             Time = showtimes.StartTime
                         }).ToList()
                     }).ToList()
