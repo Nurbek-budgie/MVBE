@@ -79,6 +79,15 @@ public class AppDbContext : IdentityDbContext<User, Role, Guid, UserClaim, UserR
             .HasForeignKey(r => r.ReservationId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.Entity<ReservedSeat>()
+            .HasOne(r => r.Screening)
+            .WithMany()
+            .HasForeignKey(r => r.ScreeningId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<ReservedSeat>()
+            .HasIndex(r => new { r.ScreeningId, r.SeatId })
+            .IsUnique();
         builder.Entity<RefreshToken>()
             .HasIndex(rt => rt.TokenHash)
             .IsUnique();
