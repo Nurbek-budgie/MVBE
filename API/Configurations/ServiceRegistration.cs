@@ -63,21 +63,27 @@ public static class ServiceRegistration
     {
         services.AddIdentity<User, Role>(options =>
         {
-            options.Password.RequireDigit = false;
-            options.Password.RequiredLength = 6;
-            options.Password.RequireUppercase = false;
-            options.Password.RequireLowercase = false;
-            options.Password.RequireNonAlphanumeric = false;
-            options.Password.RequiredUniqueChars = 0;
+            options.Password.RequireDigit = true;
+            options.Password.RequiredLength = 12;
+            options.Password.RequireUppercase = true;
+            options.Password.RequireLowercase = true;
+            options.Password.RequireNonAlphanumeric = true;
+            options.Password.RequiredUniqueChars = 4;
             options.User.RequireUniqueEmail = true;
-            // Customize as needed
+            options.Lockout.AllowedForNewUsers = true;
+            options.Lockout.MaxFailedAccessAttempts = 5;
+            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
         })
         .AddEntityFrameworkStores<AppDbContext>()
         .AddDefaultTokenProviders();
-        
+
         var jwtSettings = configuration.GetSection("Jwt");
-        // var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
-        var key = Encoding.UTF8.GetBytes(configuration["Jwt:Key"]);
+        var keyValue = jwtSettings["Key"];
+        if (string.IsNullOrWhiteSpace(keyValue) || Encoding.UTF8.GetByteCount(keyValue) < 32)
+            throw new InvalidOperationException(
+                "Jwt:Key is not configured or is shorter than 32 bytes. " +
+                "Set it via user-secrets (dotnet user-secrets set \"Jwt:Key\" \"...\") or the Jwt__Key env var.");
+        var key = Encoding.UTF8.GetBytes(keyValue);
 
         services.AddAuthentication(options =>
             {
