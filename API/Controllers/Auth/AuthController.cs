@@ -1,4 +1,4 @@
-﻿using API.Configurations;
+using API.Configurations;
 using DTO.Auth;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,7 +9,7 @@ namespace API.Controllers.Auth;
 public class AuthController : ControllerBase
 {
     private readonly AuthService _service;
-    
+
     public AuthController(AuthService service)
     {
         _service = service;
@@ -17,13 +17,17 @@ public class AuthController : ControllerBase
 
     // POST /api/auth/login
     [HttpPost("login")]
-    public async Task<ActionResult> Login([FromBody] AuthDto.Login dto)
+    public async Task<ActionResult<AuthDto.Response>> Login([FromBody] AuthDto.Login dto)
     {
-        var token = await _service.LoginAsync(dto);
+        var tokens = await _service.LoginAsync(dto);
+        return Ok(tokens);
+    }
 
-        if (token == null)
-            return Unauthorized("Invalid username or password.");
-        
-        return Ok(token);
+    // POST /api/auth/refresh
+    [HttpPost("refresh")]
+    public async Task<ActionResult<AuthDto.Response>> Refresh([FromBody] AuthDto.RefreshToken dto)
+    {
+        var tokens = await _service.RefreshAsync(dto.token);
+        return Ok(tokens);
     }
 }
