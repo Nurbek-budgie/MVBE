@@ -22,6 +22,7 @@ public class AppDbContext : IdentityDbContext<User, Role, Guid, UserClaim, UserR
     public DbSet<Reservation> Reservations { get; set; }
     public DbSet<ReservedSeat> ReservedSeats { get; set; }
     public DbSet<FeaturedMovie> FeaturedMovies { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
     
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -87,5 +88,14 @@ public class AppDbContext : IdentityDbContext<User, Role, Guid, UserClaim, UserR
         builder.Entity<ReservedSeat>()
             .HasIndex(r => new { r.ScreeningId, r.SeatId })
             .IsUnique();
+        builder.Entity<RefreshToken>()
+            .HasIndex(rt => rt.TokenHash)
+            .IsUnique();
+
+        builder.Entity<RefreshToken>()
+            .HasOne(rt => rt.User)
+            .WithMany()
+            .HasForeignKey(rt => rt.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

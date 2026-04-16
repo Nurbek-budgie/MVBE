@@ -1,102 +1,139 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using DAL.EF;
 using DAL.Models;
 using DTO.Auth;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace API.Configurations;
 
 public class AuthService
 {
+    private static readonly TimeSpan AccessTokenLifetime = TimeSpan.FromMinutes(15);
+    private static readonly TimeSpan RefreshTokenLifetime = TimeSpan.FromDays(7);
+
     private readonly UserManager<User> _userManager;
     private readonly IConfiguration _configuration;
+    private readonly AppDbContext _db;
 
-    public AuthService(UserManager<User> userManager, IConfiguration configuration)
+    public AuthService(UserManager<User> userManager, IConfiguration configuration, AppDbContext db)
     {
         _userManager = userManager;
         _configuration = configuration;
+        _db = db;
     }
 
-    // Make create user method where it will take parameter such as user, role
     public async Task<AuthDto.Response> LoginAsync(AuthDto.Login dto)
     {
         var user = await _userManager.FindByEmailAsync(dto.email);
         if (user == null || !await _userManager.CheckPasswordAsync(user, dto.password))
             throw new UnauthorizedAccessException("Invalid credentials");
 
-        var (userEntity, claims, roles) = await UserClaimsRole(dto.email, dto.password);
-        return await BuildResponse(userEntity, claims, roles);
+        return await IssueTokensAsync(user);
     }
-    
-    public async Task<(User user, IEnumerable<Claim> claims, IEnumerable<string> roles)> UserClaimsRole(string username, string password)
-    {
-        var user = await _userManager.FindByEmailAsync(username);
-        // todo exceptionss
-        if (user == null)
-        {
-            throw new Exception("User not found");
-        }
 
-        if (!await _userManager.CheckPasswordAsync(user, password))
-        {
-            throw new Exception("User password doesn't match");
-        }
+    public async Task<AuthDto.Response> RefreshAsync(string refreshToken)
+    {
+        if (string.IsNullOrWhiteSpace(refreshToken))
+            throw new UnauthorizedAccessException("Invalid refresh token");
+
+        var hash = Hash(refreshToken);
+        var existing = await _db.RefreshTokens.FirstOrDefaultAsync(rt => rt.TokenHash == hash);
+
+        if (existing == null || existing.RevokedAt != null || existing.ExpiresAt <= DateTime.UtcNow)
+            throw new UnauthorizedAccessException("Invalid refresh token");
+
+        var user = await _userManager.FindByIdAsync(existing.UserId.ToString());
+        if (user == null)
+            throw new UnauthorizedAccessException("Invalid refresh token");
+
+        existing.RevokedAt = DateTime.UtcNow;
+        var response = await IssueTokensAsync(user);
+        existing.ReplacedByTokenHash = Hash(response.RefreshToken);
+        await _db.SaveChangesAsync();
+
+        return response;
+    }
+
+    private async Task<AuthDto.Response> IssueTokensAsync(User user)
+    {
         var roles = await _userManager.GetRolesAsync(user);
-        
-        var claims = new List<Claim>()
+        var claims = BuildClaims(user, roles);
+
+        var accessTokenExpires = DateTime.UtcNow.Add(AccessTokenLifetime);
+        var accessToken = BuildAccessToken(claims, accessTokenExpires);
+
+        var refreshPlain = GenerateRefreshToken();
+        var refreshExpires = DateTime.UtcNow.Add(RefreshTokenLifetime);
+        _db.RefreshTokens.Add(new RefreshToken
         {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new(ClaimTypes.Email, username)
+            UserId = user.Id,
+            TokenHash = Hash(refreshPlain),
+            ExpiresAt = refreshExpires
+        });
+        await _db.SaveChangesAsync();
+
+        return new AuthDto.Response
+        {
+            AccessToken = accessToken,
+            RefreshToken = refreshPlain,
+            UserName = user.UserName,
+            TokenAccessExpires = accessTokenExpires,
+            RefreshTokenExpires = refreshExpires,
+            Roles = roles
+        };
+    }
+
+    private List<Claim> BuildClaims(User user, IEnumerable<string> roles)
+    {
+        var claims = new List<Claim>
+        {
+            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new(ClaimTypes.Email, user.Email ?? string.Empty)
         };
         if (user.TheaterId.HasValue)
-        {
             claims.Add(new Claim("theaterId", user.TheaterId.Value.ToString()));
+
+        foreach (var role in roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+            claims.Add(new Claim("role", role));
         }
-        
-        claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
-        claims.AddRange(roles.Select(r => new Claim("role", r)));
-        return (user, claims, roles);
+        return claims;
     }
 
-    public async Task<AuthDto.Response> BuildResponse(User user, IEnumerable<Claim> claims, IEnumerable<string> roles)
+    private string BuildAccessToken(IEnumerable<Claim> claims, DateTime expires)
     {
         var jwtSettings = _configuration.GetSection("Jwt");
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]!));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-        var accessTokenExpires = DateTime.UtcNow.AddMinutes(15);
-        var refreshTokenExpires = DateTime.UtcNow.AddDays(7);
 
         var token = new JwtSecurityToken(
             issuer: jwtSettings["Issuer"],
             audience: jwtSettings["Audience"],
             claims: claims,
-            expires: accessTokenExpires,
-            signingCredentials: creds
-        );
+            expires: expires,
+            signingCredentials: creds);
 
-        var accessToken = new JwtSecurityTokenHandler().WriteToken(token);
-        var refreshToken = GenerateRefreshToken();
-
-        return new AuthDto.Response
-        {
-            AccessToken = accessToken,
-            RefreshToken = refreshToken,
-            UserName = user.UserName,
-            TokenAccessExpires = accessTokenExpires,
-            RefreshTokenExpires = refreshTokenExpires,
-            Roles = roles
-        };
+        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    private string GenerateRefreshToken()
+    private static string GenerateRefreshToken()
     {
-        var randomBytes = new byte[64];
+        var bytes = new byte[64];
         using var rng = RandomNumberGenerator.Create();
-        rng.GetBytes(randomBytes);
-        return Convert.ToBase64String(randomBytes);
+        rng.GetBytes(bytes);
+        return Convert.ToBase64String(bytes);
+    }
+
+    private static string Hash(string value)
+    {
+        var bytes = Encoding.UTF8.GetBytes(value);
+        var hash = SHA256.HashData(bytes);
+        return Convert.ToHexString(hash);
     }
 }

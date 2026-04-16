@@ -50,9 +50,15 @@ using (var scope = app.Services.CreateScope())
     var userManager = services.GetRequiredService<UserManager<User>>();
 
     DbInitializer.Initialize(context);
-    
+
     await DbSeeder.SeedRolesAsync(roleManager);
-    await DbSeeder.SeedAdminUserAsync(userManager);
+    if (app.Environment.IsDevelopment())
+    {
+        await DbSeeder.SeedAdminUserAsync(
+            userManager,
+            builder.Configuration["Admin:Email"],
+            builder.Configuration["Admin:Password"]);
+    }
 }
 
 // Configure the HTTP request pipeline.

@@ -1,4 +1,4 @@
-﻿using Common.Enums;
+using Common.Enums;
 using DAL.Models;
 using Microsoft.AspNetCore.Identity;
 
@@ -16,26 +16,26 @@ public class DbSeeder
             }
         }
     }
-    
-    public static async Task SeedAdminUserAsync(UserManager<User> userManager)
-    {
-        var adminEmail = "admin@admin.com";
-        var existingUser = await userManager.FindByEmailAsync(adminEmail);
-        
-        if (existingUser == null)
-        {
-            var admin = new User
-            {
-                UserName = "admin",
-                Email = adminEmail,
-                EmailConfirmed = true
-            };
 
-            var result = await userManager.CreateAsync(admin, "string");
-            if (result.Succeeded)
-            {
-                await userManager.AddToRoleAsync(admin, ERoles.Admin.ToString());
-            }
+    public static async Task SeedAdminUserAsync(UserManager<User> userManager, string? adminEmail, string? adminPassword)
+    {
+        if (string.IsNullOrWhiteSpace(adminEmail) || string.IsNullOrWhiteSpace(adminPassword))
+            return;
+
+        if (await userManager.FindByEmailAsync(adminEmail) != null)
+            return;
+
+        var admin = new User
+        {
+            UserName = adminEmail,
+            Email = adminEmail,
+            EmailConfirmed = true
+        };
+
+        var result = await userManager.CreateAsync(admin, adminPassword);
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(admin, ERoles.Admin.ToString());
         }
     }
 }

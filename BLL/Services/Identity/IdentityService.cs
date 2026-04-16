@@ -40,9 +40,8 @@ public class IdentityService : IIdentityService
         var result = await _userManager.CreateAsync(user, userDto.password);
         if (!result.Succeeded)
         {
-            return IdentityResult.Failed();
+            return result;
         }
-        await _userManager.SetLockoutEnabledAsync(user, false);
         await _userManager.AddToRoleAsync(user, role.ToString());
         
         return IdentityResult.Success;
