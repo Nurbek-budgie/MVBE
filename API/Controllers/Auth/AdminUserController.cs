@@ -22,6 +22,9 @@ public class AdminUserController : ControllerBase
     [HttpPost]
     public async Task<ActionResult> CreateAdmin([FromBody] UserDto.Register userDto, [FromQuery] ERoles role)
     {
+        if (!Enum.IsDefined(typeof(ERoles), role))
+            return BadRequest("Invalid role.");
+
         var result = await _identityService.CreateUserAsync(userDto, role);
 
         if (result == null)
