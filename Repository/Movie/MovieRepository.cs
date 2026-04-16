@@ -27,13 +27,8 @@ public class MovieRepository : BaseRepository<MovieEn, int>
         using var transaction = await _dbContext.Database.BeginTransactionAsync();
         try
         {
-            var posterTask = _fileStorageService.SaveFileAsync(entity.Poster.OpenReadStream(), entity.Poster.FileName, "movie");
-            var trailerTask = _fileStorageService.SaveFileAsync(entity.Trailer.OpenReadStream(), entity.Trailer.FileName, "movie");
-
-            await Task.WhenAll(posterTask, trailerTask);
-
-            posterUrl = posterTask.Result;
-            trailerUrl = trailerTask.Result;
+            posterUrl = await _fileStorageService.SaveFileAsync(entity.Poster, "movie", UploadKind.Image);
+            trailerUrl = await _fileStorageService.SaveFileAsync(entity.Trailer, "movie", UploadKind.Video);
         
             var model = new MovieEn()
             {

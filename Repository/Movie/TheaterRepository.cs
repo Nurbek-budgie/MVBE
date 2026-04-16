@@ -21,8 +21,8 @@ public class TheaterRepository : BaseRepository<Theater, int>
         try
         {
             var entity = await _dbSet.FirstOrDefaultAsync(x => x.Id == theaterId);
-            var url = await _fileStorageService.SaveFileAsync(logo.OpenReadStream(), logo.FileName, "Logo");
-            
+            var url = await _fileStorageService.SaveFileAsync(logo, "Logo", UploadKind.Image);
+
             logoUrl = url;
             entity.LogoUrl = logoUrl;
             
