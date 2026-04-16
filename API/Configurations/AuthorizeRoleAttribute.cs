@@ -1,76 +1,41 @@
-﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using API.Configurations.Extentions;
 using Common.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.IdentityModel.Tokens;
 
 namespace API.Configurations;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = true, AllowMultiple = true)]
 public class AuthorizeRoleAttribute : AuthorizeAttribute, IAsyncActionFilter
 {
-    private readonly ERoles[] _roles;
+    private readonly HashSet<string> _allowedRoles;
 
     public AuthorizeRoleAttribute(params ERoles[] roles)
     {
-        _roles = roles;
+        _allowedRoles = roles.Select(r => r.ToString()).ToHashSet(StringComparer.OrdinalIgnoreCase);
     }
-    
+
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
-       var request  = context.HttpContext.Request;
-       var token = request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+        // Inheriting from AuthorizeAttribute makes the JwtBearer middleware run
+        // first, so HttpContext.User is populated from a *validated* token
+        // (signature, issuer, audience, expiry all checked). Only check roles here.
+        var user = context.HttpContext.User;
 
-       if (string.IsNullOrEmpty(token))
-       {
-           context.Result = new StatusCodeResult(StatusCodes.Status401Unauthorized);
-           return;
-       }
+        if (user?.Identity?.IsAuthenticated != true)
+        {
+            context.Result = new StatusCodeResult(StatusCodes.Status401Unauthorized);
+            return;
+        }
 
-       
-       // TODO check token validation parameters
-       try
-       {
-           // var jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
-           //
-           // var roleFromToken = jwtToken.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Role || x.Type == "role")?.Value.ToLower();
-           // var roleFromEnum = Enum.GetValues(typeof(ERoles))
-           //     .Cast<ERoles>()
-           //     .Where(role => _roles.Contains(role)) 
-           //     .Select(role => role.GetDescription())
-           //     .ToArray();
-           //
-           // if (string.IsNullOrEmpty(roleFromToken) || !roleFromEnum.Contains(roleFromToken))
-           // {
-           //     context.Result = new StatusCodeResult(StatusCodes.Status401Unauthorized);
-           // }
-           
-           var jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+        var roleClaims = user.FindAll(ClaimTypes.Role).Concat(user.FindAll("role"));
+        if (!roleClaims.Any(c => _allowedRoles.Contains(c.Value)))
+        {
+            context.Result = new StatusCodeResult(StatusCodes.Status403Forbidden);
+            return;
+        }
 
-           var roleFromToken = jwtToken.Claims
-               .FirstOrDefault(x => x.Type == ClaimTypes.Role || x.Type == "role")?.Value
-               ?.ToLower();
-
-           var allowedRoles = _roles.Select(r => r.ToString().ToLower()).ToArray(); 
-
-           if (string.IsNullOrEmpty(roleFromToken) || !allowedRoles.Contains(roleFromToken))
-           {
-               context.Result = new StatusCodeResult(StatusCodes.Status401Unauthorized);
-               return;
-           }
-           
-           await next();
-       }
-       catch (SecurityTokenException ex)
-       {
-           context.Result = new StatusCodeResult(StatusCodes.Status401Unauthorized);
-       }
-       catch (Exception ex)
-       {
-           context.Result = new StatusCodeResult(StatusCodes.Status500InternalServerError);
-       }
+        await next();
     }
 }
