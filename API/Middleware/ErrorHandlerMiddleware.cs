@@ -7,10 +7,17 @@ namespace API.Middleware;
 public class ErrorHandlerMiddleware
 {
     private readonly RequestDelegate _next;
+    private readonly ILogger<ErrorHandlerMiddleware> _logger;
+    private readonly IHostEnvironment _environment;
 
-    public ErrorHandlerMiddleware(RequestDelegate next)
+    public ErrorHandlerMiddleware(
+        RequestDelegate next,
+        ILogger<ErrorHandlerMiddleware> logger,
+        IHostEnvironment environment)
     {
         _next = next;
+        _logger = logger;
+        _environment = environment;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -21,17 +28,24 @@ public class ErrorHandlerMiddleware
         }
         catch (Exception ex)
         {
-            var response = context.Response;
-            response.ContentType = "application/json";
-            var responseApi = ApiResponse<string>.Failure(ex.Message);
-            switch (ex)
+            _logger.LogError(ex, "Unhandled exception for {Method} {Path}",
+                context.Request.Method, context.Request.Path);
+
+            var (status, safeMessage) = ex switch
             {
-                default:
-                    response.StatusCode = (int) HttpStatusCode.InternalServerError;
-                    break;
-            }
-            var result = JsonSerializer.Serialize(responseApi);
-            await response.WriteAsync(result);
+                KeyNotFoundException      => (HttpStatusCode.NotFound,       ex.Message),
+                UnauthorizedAccessException => (HttpStatusCode.Unauthorized, "Unauthorized"),
+                ArgumentException         => (HttpStatusCode.BadRequest,     ex.Message),
+                InvalidOperationException => (HttpStatusCode.Conflict,       ex.Message),
+                _                         => (HttpStatusCode.InternalServerError,
+                                              _environment.IsDevelopment()
+                                                  ? ex.Message
+                                                  : "An unexpected error occurred.")
+            };
+
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = (int)status;
+            await context.Response.WriteAsync(JsonSerializer.Serialize(ApiResponse<string>.Failure(safeMessage)));
         }
     }
 }
